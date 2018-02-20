@@ -7,6 +7,7 @@ GENDIR := ./gen/
 OBJDIR := $(GENDIR)/obj/
 ELFDIR := $(GENDIR)/elf/
 BINDIR := $(GENDIR)/bin/
+DEPDIR := $(GENDIR)/dep/
 
 # The cross-compilation toolchain prefix to use for gcc binaries.
 CROSS_PREFIX := arm-none-eabi
@@ -18,6 +19,9 @@ OBJCOPY := $(CROSS_PREFIX)-objcopy
 # Debug symbols are enabled with -g, but since we compile ELFs down to bin files, these don't
 # affect the code size on-device.
 CCFLAGS := -mcpu=cortex-m3 -mthumb -g
+
+# Used to rebuild when headers used by a source file change.
+DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.Td
 
 # We rely on headers from Arm's CMSIS library for things like device register layouts. To
 # download the library, use `git clone https://github.com/ARM-software/CMSIS_5` in the parent
@@ -38,7 +42,10 @@ ASFLAGS :=
 LDFLAGS := -T stm32_linker_layout.lds
 
 # Rule used when no target is specified.
-all: $(BINDIR)/examples/blink.bin $(BINDIR)/examples/hello_world.bin
+all: \
+$(BINDIR)/examples/blink.bin \
+$(BINDIR)/examples/hello_world.bin \
+$(BINDIR)/examples/benchmark_arithmetic.bin
 
 clean:
 	rm -rf $(GENDIR)
@@ -46,7 +53,9 @@ clean:
 # Generic rules for generating different file types.
 $(OBJDIR)%.o: %.c
 	@mkdir -p $(dir $@)
-	$(CC) $(CCFLAGS) $(INCLUDES) -c $< -o $@
+	@mkdir -p $(dir $(DEPDIR)$*)
+	$(CC) $(CCFLAGS) $(INCLUDES) $(DEPFLAGS) -c $< -o $@
+	@mv -f $(DEPDIR)/$*.Td $(DEPDIR)/$*.d
 
 $(OBJDIR)%.o: %.s
 	@mkdir -p $(dir $@)
@@ -55,6 +64,12 @@ $(OBJDIR)%.o: %.s
 $(BINDIR)/%.bin: $(ELFDIR)/%.elf
 	@mkdir -p $(dir $@)
 	$(OBJCOPY) $< $@ -O binary
+
+# Include dependency tracking rules.
+$(DEPDIR)/%.d: ;
+.PRECIOUS: $(DEPDIR)/%.d
+ALL_SRCS := $(wildcard examples/*/*.c)
+-include $(patsubst %,$(DEPDIR)/%.d,$(basename $(ALL_SRCS)))
 
 # Blink example rules.
 # The boot.s file need to be first in linking order, since it has to be at the start of
@@ -78,3 +93,13 @@ $(patsubst %.c,%.o,$(patsubst %.s,%.o,$(HELLO_WORLD_SRCS))))
 $(ELFDIR)/examples/hello_world.elf: $(HELLO_WORLD_OBJS)
 	@mkdir -p $(dir $@)
 	$(LD) $(LDFLAGS) -o $@ $(HELLO_WORLD_OBJS)
+
+# Benchmark arithmetic example rules.
+BENCHMARK_ARITHMETIC_SRCS := source/boot.s \
+$(wildcard examples/benchmark_arithmetic/*.c)
+BENCHMARK_ARITHMETIC_OBJS := $(addprefix $(OBJDIR), \
+$(patsubst %.c,%.o,$(patsubst %.s,%.o,$(BENCHMARK_ARITHMETIC_SRCS))))
+
+$(ELFDIR)/examples/benchmark_arithmetic.elf: $(BENCHMARK_ARITHMETIC_OBJS)
+	@mkdir -p $(dir $@)
+	$(LD) $(LDFLAGS) -o $@ $(BENCHMARK_ARITHMETIC_OBJS)

@@ -17,6 +17,10 @@ limitations under the License.
 #ifndef INCLUDE_DEBUG_LOG_H
 #define INCLUDE_DEBUG_LOG_H
 
+#include <stdint.h>
+
+#include "strings.h"
+
 // Writes a string to the OpenOCD debug console. This can take hundreds of
 // milliseconds, so don't call this in performance-intensive code.
 static inline void DebugLog(char* s) {
@@ -26,6 +30,22 @@ static inline void DebugLog(char* s) {
       :
       : [str] "r"(s)
       : "r0", "r1");
+}
+
+// Writes out a signed 32-bit number to the debug console.
+static inline void DebugLogInt32(int32_t i) {
+  char number_string[kFastToBufferSize];
+  number_string[0] = 'b';
+  number_string[1] = 0;
+  FastInt32ToBufferLeft(i, number_string);
+  DebugLog(number_string);
+}
+
+// Writes out an unsigned 32-bit number to the debug console.
+static inline void DebugLogUInt32(uint32_t i) {
+  char number_string[kFastToBufferSize];
+  FastUInt32ToBufferLeft(i, number_string);
+  DebugLog(number_string);
 }
 
 #endif  // INCLUDE_DEBUG_LOG_H
