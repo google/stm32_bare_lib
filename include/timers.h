@@ -17,6 +17,17 @@ limitations under the License.
 
 #include <stdint.h>
 
+// We know the "Blue Pill" STM32 board runs at 72 MHz.
+#define CLOCK_RATE (72 * 1000 * 1000)
+
+// There's a default SysTick handler function defined in source/timers.c that
+// just increments the g_tick_count variable by default. Optionally, you can
+// set g_tick_callback and it will call into a user-defined function too.
+// To control the frequency, you'll need to call the CMSIS SysTick_Config().
+extern uint32_t g_tick_count;
+typedef void (*OnSysTickCallback)(int tick_count);
+extern OnSysTickCallback g_tick_callback;
+
 // Spin in a loop for roughly the specified number of microseconds. This is
 // using instruction timing, so it's not precise, and the processor will be
 // consuming power while this is running.

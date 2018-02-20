@@ -42,7 +42,7 @@ limitations under the License.
 .word _infinite_loop // Unused.
 .word _infinite_loop // Unused.
 .word _infinite_loop // PendSV.
-.word _infinite_loop // SysTick.
+.word OnSysTick      // SysTick.
 .word _infinite_loop // IRQ0.
 .word _infinite_loop // IRQ1.
 .word _infinite_loop //

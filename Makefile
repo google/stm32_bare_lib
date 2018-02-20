@@ -68,16 +68,26 @@ $(BINDIR)/%.bin: $(ELFDIR)/%.elf
 # Include dependency tracking rules.
 $(DEPDIR)/%.d: ;
 .PRECIOUS: $(DEPDIR)/%.d
-ALL_SRCS := $(wildcard examples/*/*.c)
+ALL_SRCS := \
+$(wildcard examples/*/*.c) \
+$(wildcard source/*.c)
 -include $(patsubst %,$(DEPDIR)/%.d,$(basename $(ALL_SRCS)))
 
+# Library source files.
+# The order of boot.s is important, since it needs to be first in linking
+# order, since it has to be at the start of flash memory when the chip is reset
+LIBRARY_SRCS := \
+$(wildcard source/boot.s) \
+$(wildcard source/*.c)
+LIBRARY_OBJS := $(addprefix $(OBJDIR), \
+$(patsubst %.c,%.o,$(patsubst %.s,%.o,$(LIBRARY_SRCS))))
+
 # Blink example rules.
-# The boot.s file need to be first in linking order, since it has to be at the start of
-# flash memory when the chip is reset.
-BLINK_SRCS := source/boot.s \
-$(wildcard examples/blink/*.c)
-BLINK_OBJS := $(addprefix $(OBJDIR), \
-$(patsubst %.c,%.o,$(patsubst %.s,%.o,$(BLINK_SRCS))))
+# The library objects need to be at the start, since the order of boot.s is
+# important in the final binary.
+BLINK_SRCS := $(wildcard examples/blink/*.c)
+BLINK_OBJS := $(LIBRARY_OBJS) \
+$(addprefix $(OBJDIR), $(patsubst %.c,%.o,$(patsubst %.s,%.o,$(BLINK_SRCS))))
 
 # Link the blink example.
 $(ELFDIR)/examples/blink.elf: $(BLINK_OBJS)
@@ -85,20 +95,18 @@ $(ELFDIR)/examples/blink.elf: $(BLINK_OBJS)
 	$(LD) $(LDFLAGS) -o $@ $(BLINK_OBJS)
 
 # Hello world example rules.
-HELLO_WORLD_SRCS := source/boot.s \
-$(wildcard examples/hello_world/*.c)
-HELLO_WORLD_OBJS := $(addprefix $(OBJDIR), \
-$(patsubst %.c,%.o,$(patsubst %.s,%.o,$(HELLO_WORLD_SRCS))))
+HELLO_WORLD_SRCS := $(wildcard examples/hello_world/*.c)
+HELLO_WORLD_OBJS := $(LIBRARY_OBJS) \
+$(addprefix $(OBJDIR), $(patsubst %.c,%.o,$(patsubst %.s,%.o,$(HELLO_WORLD_SRCS))))
 
 $(ELFDIR)/examples/hello_world.elf: $(HELLO_WORLD_OBJS)
 	@mkdir -p $(dir $@)
 	$(LD) $(LDFLAGS) -o $@ $(HELLO_WORLD_OBJS)
 
 # Benchmark arithmetic example rules.
-BENCHMARK_ARITHMETIC_SRCS := source/boot.s \
-$(wildcard examples/benchmark_arithmetic/*.c)
-BENCHMARK_ARITHMETIC_OBJS := $(addprefix $(OBJDIR), \
-$(patsubst %.c,%.o,$(patsubst %.s,%.o,$(BENCHMARK_ARITHMETIC_SRCS))))
+BENCHMARK_ARITHMETIC_SRCS := $(wildcard examples/benchmark_arithmetic/*.c)
+BENCHMARK_ARITHMETIC_OBJS := $(LIBRARY_OBJS) \
+$(addprefix $(OBJDIR), $(patsubst %.c,%.o,$(patsubst %.s,%.o,$(BENCHMARK_ARITHMETIC_SRCS))))
 
 $(ELFDIR)/examples/benchmark_arithmetic.elf: $(BENCHMARK_ARITHMETIC_OBJS)
 	@mkdir -p $(dir $@)

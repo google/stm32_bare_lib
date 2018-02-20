@@ -46,7 +46,8 @@ typedef enum IRQn {
   DMA1_Channel6_IRQn = 16,
   DMA1_Channel7_IRQn = 17,
 } IRQn_Type;
-#define __NVIC_PRIO_BITS 4
+#define __NVIC_PRIO_BITS (2)
+#define __Vendor_SysTickConfig (0)
 
 // This include relies on CMSIS being downloaded. See README for details.
 #include <core_cm3.h>
@@ -84,6 +85,14 @@ typedef struct {
   __IO uint16_t UNUSED3;  // Unused.
   __IO uint32_t LCKR;     // Port Configuration Lock.
 } GPIO_t;
+
+// SysTick control.
+typedef struct {
+  __IO uint32_t CTRL;    // Control and Status.
+  __IOM uint32_t LOAD;   // Reload Value.
+  __IOM uint32_t VAL;    // Current Value.
+  __IM  uint32_t CALIB;  // Calibration.
+} SysTick_t;
 
 // Addresses of peripherals.
 #define RCC_BASE ((uint32_t)0x40021000)
