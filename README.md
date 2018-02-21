@@ -10,7 +10,7 @@ Unfortunately, though their price point makes them very accessible, there are ot
 
 ## What You Need
 
-Before you get started, you'll need to have a few pieces of hardware available. No soldering or tools are required though, you should be able to assemble everything you need by hand. My thanks go to Andrew Selle who pioneered the approach that I've documented below.
+Before you get started, you'll need to have a few pieces of hardware available. No soldering or tools are required though, you should be able to assemble everything you need by hand. My thanks go to [Andy Selle](http://www.andyselle.com/) who pioneered the approach that I've documented below.
 
 - **Blue Pill Board**. You can usually find these by [searching on Ebay](https://www.google.com/search?q=site%3Aebay.com+blue+pill+board) or Aliexpress. They come with free shipping, but be aware that can take several weeks, so I often choose a faster option. I also recommend picking up several boards at once, since they're cheap and spares will come in handy in case one is damaged.
 
