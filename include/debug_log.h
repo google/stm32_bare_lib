@@ -37,14 +37,21 @@ static inline void DebugLogInt32(int32_t i) {
   char number_string[kFastToBufferSize];
   number_string[0] = 'b';
   number_string[1] = 0;
-  FastInt32ToBufferLeft(i, number_string);
+  FastInt32ToBufferLeft(i, number_string, 10);
   DebugLog(number_string);
 }
 
 // Writes out an unsigned 32-bit number to the debug console.
 static inline void DebugLogUInt32(uint32_t i) {
   char number_string[kFastToBufferSize];
-  FastUInt32ToBufferLeft(i, number_string);
+  FastUInt32ToBufferLeft(i, number_string, 10);
+  DebugLog(number_string);
+}
+
+// Writes out an unsigned 32-bit number to the debug console as hex.
+static inline void DebugLogHex(uint32_t i) {
+  char number_string[kFastToBufferSize];
+  FastUInt32ToBufferLeft(i, number_string, 16);
   DebugLog(number_string);
 }
 

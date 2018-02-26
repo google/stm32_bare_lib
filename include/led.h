@@ -23,7 +23,7 @@ limitations under the License.
 // This needs to be called before the LED can be accessed.
 static inline void LedInit() {
   // Enable GPIOC.
-  RCC->APB2ENR |= RCC_GPIOC_ENABLE;
+  RCC->APB2ENR |= RCC_APB2ENR_IOPCEN;
 
   // Set up speed and configuration.
   const int shift = (LED_PORT - 8) * 4;

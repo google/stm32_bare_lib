@@ -32,47 +32,27 @@ void OnReset(void) {
   RccInitForAdc();
 
   // TODO: At the moment, only port A0 seems to be working.
-  AdcInit(GPIOA, 0);
+  AdcInit(GPIOA, 0, 0);
   DmaInit();
   AdcDmaOn(g_dma_buffer, DMA_BUFFER_SIZE);
-  AdcOn();
+  //AdcOn();
   while (1) {
     const int32_t adc_log_length = 256;
     char adc_log[adc_log_length];
     StrCpy(adc_log, adc_log_length, "DMA: ");
-    StrCatInt32(adc_log, adc_log_length, g_error_count);
-    StrCatStr(adc_log, adc_log_length, " errors,");
-    StrCatInt32(adc_log, adc_log_length, g_half_count);
-    StrCatStr(adc_log, adc_log_length, " half,");
-    StrCatInt32(adc_log, adc_log_length, g_complete_count);
+    StrCatInt32(adc_log, adc_log_length, g_error_count, 10);
+    StrCatStr(adc_log, adc_log_length, " errors, ");
+    StrCatInt32(adc_log, adc_log_length, g_half_count, 10);
+    StrCatStr(adc_log, adc_log_length, " half, ");
+    StrCatInt32(adc_log, adc_log_length, g_complete_count, 10);
     StrCatStr(adc_log, adc_log_length, " complete\n");
     DebugLog(adc_log);
   }
   AdcOff();
 }
 
-// If you have a function named OnAdcInterrupt() in your program, this will be
-// called once an ADC value is available, if you've set up the system as shown
-// in the OnReset() function above.
-void OnAdcInterrupt() {
-  // We're expecting an EOC signal to be marked in the status register.
-  if (!(ADC1->SR & ADC_SR_EOC)) {
-    DebugLog("ADC Interrupt called outside of an End Of Conversion event.\n");
-    return;
-  }
-  // Read the value from the data register and output it to the debug log.
-  const int32_t adc_value = ADC1->DR;
-  const int32_t adc_log_length = 256;
-  char adc_log[adc_log_length];
-  StrCpy(adc_log, adc_log_length, "ADC: ");
-  StrCatInt32(adc_log, adc_log_length, adc_value);
-  StrCatStr(adc_log, adc_log_length, "\n");
-  DebugLog(adc_log);
-}
-
 void OnDma1Channel1Interrupt() {
   if (DMA1->ISR & DMA_ISR_TEIF1) {
-    //DebugLog("DMA Error\n");
     ++g_error_count;
     DMA1->IFCR |= DMA_IFCR_CTEIF1;
     return;

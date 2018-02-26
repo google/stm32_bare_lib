@@ -40,9 +40,15 @@ static inline void EnableNvic(int irq) {
 
 // Sets up the clock control system for ADC access.
 static inline void RccInitForAdc(void) {
-  //  RCC->CFGR = PLL_HSE | PLL_9 | SYS_HSI | APB1_DIV2;
-  RCC->CFGR = RCC_CFGR_PLLSRC_HSE | RCC_CFGR_PLLMUL_9 | RCC_CFGR_SW_HSI | RCC_CFGR_PPRE1_DIV_2;
-  RCC->CR = RCC_CR_HSION | RCC_CR_HSEON | RCC_CR_PLLON;
+  RCC->CFGR =
+    RCC_CFGR_PLLSRC_HSE |
+    RCC_CFGR_PLLMUL_9 |
+    RCC_CFGR_SW_HSI |
+    RCC_CFGR_PPRE1_DIV_2;
+  RCC->CR =
+    RCC_CR_HSION |
+    RCC_CR_HSEON |
+    RCC_CR_PLLON;
   while (!(RCC->CR & RCC_CR_PLLRDY)) {
   }
 
@@ -50,28 +56,45 @@ static inline void RccInitForAdc(void) {
   // and a two-clock wait for access.
   *FLASH_ACR = FLASH_ACR_PRFTBE | FLASH_ACR_LATENCY_2;
 
-  //RCC->CFGR = PLL_HSE | PLL_9 | SYS_PLL | ADC_DIV6 | APB1_DIV2;
-  RCC->CFGR = RCC_CFGR_PLLSRC_HSE | RCC_CFGR_PLLMUL_9 | RCC_CFGR_SW_PLL | RCC_CFGR_ADCPRE_DIV_6 | RCC_CFGR_HPRE_DIV_2;
-  
-  RCC->APB2ENR |= RCC_GPIOA_ENABLE;
-  RCC->APB2ENR |= RCC_GPIOB_ENABLE;
-  RCC->APB2ENR |= RCC_GPIOC_ENABLE;
-  RCC->APB2ENR |= RCC_ADC1_ENABLE;
-  RCC->APB2ENR |= RCC_ADC2_ENABLE;
-  RCC->APB2ENR |= RCC_UART1_ENABLE;
-  RCC->APB1ENR |= RCC_TIMER2_ENABLE;
+  RCC->CFGR =
+    RCC_CFGR_PLLSRC_HSE |
+    RCC_CFGR_PLLMUL_9 |
+    RCC_CFGR_SW_PLL |
+    RCC_CFGR_ADCPRE_DIV_8 |
+    RCC_CFGR_HPRE_DIV_2;
+
+  RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
+
+  RCC->APB2ENR |= RCC_APB2ENR_IOPAEN;
+  RCC->APB2ENR |= RCC_APB2ENR_IOPBEN;
+  RCC->APB2ENR |= RCC_APB2ENR_IOPCEN;
+  RCC->APB2ENR |= RCC_APB2ENR_ADC1EN;
+  RCC->APB2ENR |= RCC_APB2ENR_ADC2EN;
+  RCC->APB2ENR |= RCC_APB2ENR_USART1EN;
 }
 
 // This needs to be called before the ADC can be accessed.
-static inline void AdcInit(GPIO_t* gpio, int port) {
-  EnableNvic(ADC_IRQ_NUMBER);
+static inline void AdcInit(GPIO_t* gpio, int port, int do_interrupt) {
+  if (do_interrupt) {
+    EnableNvic(ADC_IRQ_NUMBER);
+  }
+  if (do_interrupt) {
+    // Trigger an interrupt at the end of a conversion.
+    ADC1->CR1 |= ADC_CR1_EOCIE;
+  } else {
+    ADC1->CR2 |= ADC_CR2_CONT;
+    ADC1->CR2 |= ADC_CR2_DMA;
+    ADC1->CR2 |= ADC_CR2_SWSTART | ADC_CR2_EXTTRIG;
+  }
+
   ADC1->CR2 |= ADC_CR2_ADON | ADC_CR2_TSVREFE;
   BusyWaitMicroseconds(30 * 1000);
   ADC1->CR2 |= ADC_CR2_CAL;
   while (ADC1->CR2 & ADC_CR2_CAL) {
   }
-  // Trigger an interrupt at the end of a conversion.
-  //ADC1->CR1 |= ADC_CR1_EOCIE;
+
+  ADC1->CR2 |= ADC_CR2_ADON;
+  
   SetGpioMode(gpio, port, GPIO_MODE_INPUT_ANALOG);
 }
 
@@ -91,11 +114,11 @@ static inline void AdcDmaOn(void* dma_buffer, int dma_buffer_count) {
     DMA_CCR_TEIE |
     DMA_CCR_DIR_FROM_PERIPHERAL |
     DMA_CCR_CIRC |
+    DMA_CCR_MINC |
     DMA_CCR_PSIZE_16 |
     DMA_CCR_MSIZE_16 |
     DMA_CCR_PL_LOW;
   DMA1->CCR1 |= DMA_CCR_EN;
-  ADC1->CR2 |= ADC_CR2_DMA;
 }
 
 static inline void AdcOn(void) {

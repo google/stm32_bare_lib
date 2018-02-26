@@ -30,11 +30,11 @@ static inline char* ReverseStringInPlace(char* start, char* end) {
 }
 
 // Populates the provided buffer with an ASCII representation of the number.
-static inline char* FastUInt32ToBufferLeft(uint32_t i, char* buffer) {
+static inline char* FastUInt32ToBufferLeft(uint32_t i, char* buffer, int base) {
   char* start = buffer;
   do {
-    *buffer++ = ((i % 10) + '0');
-    i /= 10;
+    *buffer++ = ((i % base) + '0');
+    i /= base;
   } while (i > 0);
   *buffer = 0;
   ReverseStringInPlace(start, buffer);
@@ -42,16 +42,16 @@ static inline char* FastUInt32ToBufferLeft(uint32_t i, char* buffer) {
 }
 
 // All input buffers to the number conversion functions must be this long.
-static const int kFastToBufferSize = 32;
+static const int kFastToBufferSize = 48;
 
 // Populates the provided buffer with an ASCII representation of the number.
-static inline char* FastInt32ToBufferLeft(int32_t i, char* buffer) {
+static inline char* FastInt32ToBufferLeft(int32_t i, char* buffer, int base) {
   uint32_t u = i;
   if (i < 0) {
     *buffer++ = '-';
     u = -u;
   }
-  return FastUInt32ToBufferLeft(u, buffer);
+  return FastUInt32ToBufferLeft(u, buffer, base);
 }
 
 // Appends a string to a string, in-place. You need to pass in the maximum string
@@ -72,16 +72,16 @@ static inline char* StrCatStr(char* main, int main_max_length, char* to_append) 
 }
 
 // Converts a number to a string and appends it to another.
-static inline char* StrCatInt32(char* main, int main_max_length, int32_t number) {
+static inline char* StrCatInt32(char* main, int main_max_length, int32_t number, int base) {
   char number_string[kFastToBufferSize];
-  FastInt32ToBufferLeft(number, number_string);
+  FastInt32ToBufferLeft(number, number_string, base);
   StrCatStr(main, main_max_length, number_string);
 }
 
 // Converts a number to a string and appends it to another.
-static inline char* StrCatUInt32(char* main, int main_max_length, uint32_t number) {
+static inline char* StrCatUInt32(char* main, int main_max_length, uint32_t number, int base) {
   char number_string[kFastToBufferSize];
-  FastUInt32ToBufferLeft(number, number_string);
+  FastUInt32ToBufferLeft(number, number_string, base);
   StrCatStr(main, main_max_length, number_string);
 }
 

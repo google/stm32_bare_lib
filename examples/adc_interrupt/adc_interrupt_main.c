@@ -23,7 +23,7 @@ void OnReset(void) {
   RccInitForAdc();
 
   // TODO: At the moment, only port A0 seems to be working.
-  AdcInit(GPIOA, 0);
+  AdcInit(GPIOA, 0, 1);
   while (1) {
     // Calls to AdcOn() cause the interrupt to be called back once
     // a value is available.
@@ -46,7 +46,7 @@ void OnAdcInterrupt() {
   const int32_t adc_log_length = 256;
   char adc_log[adc_log_length];
   StrCpy(adc_log, adc_log_length, "ADC: ");
-  StrCatInt32(adc_log, adc_log_length, adc_value);
+  StrCatInt32(adc_log, adc_log_length, adc_value, 10);
   StrCatStr(adc_log, adc_log_length, "\n");
   DebugLog(adc_log);
 }
