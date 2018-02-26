@@ -46,7 +46,8 @@ all: \
 $(BINDIR)/examples/blink.bin \
 $(BINDIR)/examples/hello_world.bin \
 $(BINDIR)/examples/benchmark_arithmetic.bin \
-$(BINDIR)/examples/adc_interrupt.bin
+$(BINDIR)/examples/adc_interrupt.bin \
+$(BINDIR)/examples/adc_dma.bin
 
 clean:
 	rm -rf $(GENDIR)
@@ -121,3 +122,12 @@ $(addprefix $(OBJDIR), $(patsubst %.c,%.o,$(patsubst %.s,%.o,$(ADC_INTERRUPT_SRC
 $(ELFDIR)/examples/adc_interrupt.elf: $(ADC_INTERRUPT_OBJS)
 	@mkdir -p $(dir $@)
 	$(LD) $(LDFLAGS) -o $@ $(ADC_INTERRUPT_OBJS)
+
+# ADC example using DMA.
+ADC_DMA_SRCS := $(wildcard examples/adc_dma/*.c)
+ADC_DMA_OBJS := $(LIBRARY_OBJS) \
+$(addprefix $(OBJDIR), $(patsubst %.c,%.o,$(patsubst %.s,%.o,$(ADC_DMA_SRCS))))
+
+$(ELFDIR)/examples/adc_dma.elf: $(ADC_DMA_OBJS)
+	@mkdir -p $(dir $@)
+	$(LD) $(LDFLAGS) -o $@ $(ADC_DMA_OBJS)

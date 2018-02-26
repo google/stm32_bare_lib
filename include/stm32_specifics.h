@@ -82,6 +82,47 @@ typedef struct {
   __IO uint32_t DR;
 } ADC_t;
 
+// DMA register layout.
+typedef struct {
+  __IO uint32_t ISR;
+  __IO uint32_t IFCR;
+  __IO uint32_t CCR1;
+  __IO uint32_t CNDTR1;
+  __IO uint32_t CPAR1;
+  __IO uint32_t CMAR1;
+  __IO uint32_t UNUSED1;
+  __IO uint32_t CCR2;
+  __IO uint32_t CNDTR2;
+  __IO uint32_t CPAR2;
+  __IO uint32_t CMAR2;
+  __IO uint32_t UNUSED2;
+  __IO uint32_t CCR3;
+  __IO uint32_t CNDTR3;
+  __IO uint32_t CPAR3;
+  __IO uint32_t CMAR3;
+  __IO uint32_t UNUSED3;
+  __IO uint32_t CCR4;
+  __IO uint32_t CNDTR4;
+  __IO uint32_t CPAR4;
+  __IO uint32_t CMAR4;
+  __IO uint32_t UNUSED4;
+  __IO uint32_t CCR5;
+  __IO uint32_t CNDTR5;
+  __IO uint32_t CPAR5;
+  __IO uint32_t CMAR5;
+  __IO uint32_t UNUSED5;
+  __IO uint32_t CCR6;
+  __IO uint32_t CNDTR6;
+  __IO uint32_t CPAR6;
+  __IO uint32_t CMAR6;
+  __IO uint32_t UNUSED6;
+  __IO uint32_t CCR7;
+  __IO uint32_t CNDTR7;
+  __IO uint32_t CPAR7;
+  __IO uint32_t CMAR7;
+  __IO uint32_t UNUSED7;
+} DMA_t;
+
 // Addresses of peripherals.
 #define RCC_BASE ((uint32_t)0x40021000)
 #define GPIOA_BASE ((uint32_t)0x40010800)
@@ -90,6 +131,8 @@ typedef struct {
 #define ADC1_BASE ((uint32_t)0x40012400)
 #define ADC2_BASE ((uint32_t)0x40012800)
 #define FLASH_ACR_BASE ((uint32_t)0x40022000)
+#define DMA1_BASE ((uint32_t)0x40020000)
+#define DMA2_BASE ((uint32_t)0x40020400)
 
 // Globals for accessing peripherals.
 #define RCC ((RCC_t*)RCC_BASE)
@@ -99,6 +142,8 @@ typedef struct {
 #define ADC1 ((ADC_t*)ADC1_BASE)
 #define ADC2 ((ADC_t*)ADC2_BASE)
 #define FLASH_ACR ((volatile uint32_t*)FLASH_ACR_BASE)
+#define DMA1 ((DMA_t*)DMA1_BASE)
+#define DMA2 ((DMA_t*)DMA2_BASE)
 
 // Register access values.
 #define RCC_GPIOA_ENABLE (0x4)
@@ -227,5 +272,96 @@ typedef struct {
 #define RCC_CFGR_MCO_SYS_CLOCK ((1 << 26) | (1 << 24))
 #define RCC_CFGR_MCO_HSI_CLOCK ((1 << 26) | (2 << 24))
 #define RCC_CFGR_MCO_PLL_CLOCK ((1 << 26) | (3 << 24))
+
+// Reset and Clock Control AHB Peripheral Clock Enable Register flag values.
+#define RCC_AHBENR_DMA1EN (1 << 0)
+#define RCC_AHBENR_DMA2EN (1 << 1)
+#define RCC_AHBENR_SRAMEN (1 << 2)
+#define RCC_AHBENR_FLITFEN (1 << 4)
+#define RCC_AHBENR_CRCEN (1 << 6)
+#define RCC_AHBENR_FSMCEN (1 << 8)
+#define RCC_AHBENR_SDIOEN (1 << 10)
+
+// DMA Configuration Register flag values.
+#define DMA_CCR_EN (1 << 0)
+#define DMA_CCR_TCIE (1 << 1)
+#define DMA_CCR_HTIE (1 << 2)
+#define DMA_CCR_TEIE (1 << 3)
+#define DMA_CCR_DIR_FROM_PERIPHERAL (0 << 4)
+#define DMA_CCR_DIR_FROM_MEMORY (1 << 4)
+#define DMA_CCR_CIRC (1 << 5)
+#define DMA_CCR_PINC (1 << 6)
+#define DMA_CCR_MINC (1 << 7)
+#define DMA_CCR_PSIZE_8 (0 << 8)
+#define DMA_CCR_PSIZE_16 (1 << 8)
+#define DMA_CCR_PSIZE_32 (2 << 8)
+#define DMA_CCR_MSIZE_8 (0 << 10)
+#define DMA_CCR_MSIZE_16 (1 << 10)
+#define DMA_CCR_MSIZE_32 (2 << 10)
+#define DMA_CCR_PL_LOW (0 << 12)
+#define DMA_CCR_PL_MEDIUM (1 << 12)
+#define DMA_CCR_PL_HIGH (2 << 12)
+#define DMA_CCR_PL_VERY_HIGH (3 << 12)
+#define DMA_CCR_MEM2MEM (1 << 14)
+
+// DMA Interrupt Status Register flag values.
+#define DMA_ISR_GIF1 (1 << 0)
+#define DMA_ISR_TCIF1 (1 << 1)
+#define DMA_ISR_HTIF1 (1 << 2)
+#define DMA_ISR_TEIF1 (1 << 3)
+#define DMA_ISR_GIF2 (1 << 4)
+#define DMA_ISR_TCIF2 (1 << 5)
+#define DMA_ISR_HTIF2 (1 << 6)
+#define DMA_ISR_TEIF2 (1 << 7)
+#define DMA_ISR_GIF3 (1 << 8)
+#define DMA_ISR_TCIF3 (1 << 9)
+#define DMA_ISR_HTIF3 (1 << 10)
+#define DMA_ISR_TEIF3 (1 << 11)
+#define DMA_ISR_GIF4 (1 << 12)
+#define DMA_ISR_TCIF4 (1 << 13)
+#define DMA_ISR_HTIF4 (1 << 14)
+#define DMA_ISR_TEIF4 (1 << 15)
+#define DMA_ISR_GIF5 (1 << 16)
+#define DMA_ISR_TCIF5 (1 << 17)
+#define DMA_ISR_HTIF5 (1 << 18)
+#define DMA_ISR_TEIF5 (1 << 19)
+#define DMA_ISR_GIF6 (1 << 20)
+#define DMA_ISR_TCIF6 (1 << 21)
+#define DMA_ISR_HTIF6 (1 << 22)
+#define DMA_ISR_TEIF6 (1 << 23)
+#define DMA_ISR_GIF7 (1 << 24)
+#define DMA_ISR_TCIF7 (1 << 25)
+#define DMA_ISR_HTIF7 (1 << 26)
+#define DMA_ISR_TEIF7 (1 << 27)
+
+// DMA Interrupt Clear Register flag values.
+#define DMA_IFCR_CGIF1 (1 << 0)
+#define DMA_IFCR_CTCIF1 (1 << 1)
+#define DMA_IFCR_CHTIF1 (1 << 2)
+#define DMA_IFCR_CTEIF1 (1 << 3)
+#define DMA_IFCR_CGIF2 (1 << 4)
+#define DMA_IFCR_CTCIF2 (1 << 5)
+#define DMA_IFCR_CHTIF2 (1 << 6)
+#define DMA_IFCR_CTEIF2 (1 << 7)
+#define DMA_IFCR_CGIF3 (1 << 8)
+#define DMA_IFCR_CTCIF3 (1 << 9)
+#define DMA_IFCR_CHTIF3 (1 << 10)
+#define DMA_IFCR_CTEIF3 (1 << 11)
+#define DMA_IFCR_CGIF4 (1 << 12)
+#define DMA_IFCR_CTCIF4 (1 << 13)
+#define DMA_IFCR_CHTIF4 (1 << 14)
+#define DMA_IFCR_CTEIF4 (1 << 15)
+#define DMA_IFCR_CGIF5 (1 << 16)
+#define DMA_IFCR_CTCIF5 (1 << 17)
+#define DMA_IFCR_CHTIF5 (1 << 18)
+#define DMA_IFCR_CTEIF5 (1 << 19)
+#define DMA_IFCR_CGIF6 (1 << 20)
+#define DMA_IFCR_CTCIF6 (1 << 21)
+#define DMA_IFCR_CHTIF6 (1 << 22)
+#define DMA_IFCR_CTEIF6 (1 << 23)
+#define DMA_IFCR_CGIF7 (1 << 24)
+#define DMA_IFCR_CTCIF7 (1 << 25)
+#define DMA_IFCR_CHTIF7 (1 << 26)
+#define DMA_IFCR_CTEIF7 (1 << 27)
 
 #endif  // INCLUDE_STM32_SPECIFICS_H

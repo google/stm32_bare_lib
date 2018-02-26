@@ -54,13 +54,13 @@ limitations under the License.
 .word _infinite_loop // IRQ8.
 .word _infinite_loop // IRQ9.
 .word _infinite_loop // IRQ10.
-.word _infinite_loop // IRQ11.
-.word _infinite_loop // IRQ12.
-.word _infinite_loop // IRQ13.
-.word _infinite_loop // IRQ14.
-.word _infinite_loop // IRQ15.
-.word _infinite_loop // IRQ16.
-.word _infinite_loop // IRQ17.
+.word OnDma1Channel1Interrupt // IRQ11.
+.word OnDma1Channel2Interrupt // IRQ12.
+.word OnDma1Channel3Interrupt // IRQ13.
+.word OnDma1Channel4Interrupt // IRQ14.
+.word OnDma1Channel5Interrupt // IRQ15.
+.word OnDma1Channel6Interrupt // IRQ16.
+.word OnDma1Channel7Interrupt // IRQ17.
 .word OnAdcInterrupt // IRQ18.
 .word _infinite_loop // IRQ19.
 .word _infinite_loop // IRQ20.
@@ -109,3 +109,24 @@ _on_reset_asm:
 
 .weak OnAdcInterrupt
 .thumb_set OnAdcInterrupt, _infinite_loop
+
+.weak OnDma1Channel1Interrupt
+.thumb_set OnDma1Channel1, _infinite_loop
+
+.weak OnDma1Channel2Interrupt
+.thumb_set OnDma1Channel2, _infinite_loop
+
+.weak OnDma1Channel3Interrupt
+.thumb_set OnDma1Channel3, _infinite_loop
+
+.weak OnDma1Channel4Interrupt
+.thumb_set OnDma1Channel4, _infinite_loop
+
+.weak OnDma1Channel5Interrupt
+.thumb_set OnDma1Channel5, _infinite_loop
+
+.weak OnDma1Channel6Interrupt
+.thumb_set OnDma1Channel6, _infinite_loop
+
+.weak OnDma1Channel7Interrupt
+.thumb_set OnDma1Channel7, _infinite_loop

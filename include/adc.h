@@ -71,15 +71,38 @@ static inline void AdcInit(GPIO_t* gpio, int port) {
   while (ADC1->CR2 & ADC_CR2_CAL) {
   }
   // Trigger an interrupt at the end of a conversion.
-  ADC1->CR1 |= ADC_CR1_EOCIE;
+  //ADC1->CR1 |= ADC_CR1_EOCIE;
   SetGpioMode(gpio, port, GPIO_MODE_INPUT_ANALOG);
 }
 
-static inline void AdcOn(void ) {
+static inline void DmaInit() {
+  EnableNvic(DMA1_Channel1_IRQn);
+  RCC->AHBENR |= RCC_AHBENR_DMA1EN;
+  volatile uint32_t read_value = RCC->AHBENR;
+}
+
+static inline void AdcDmaOn(void* dma_buffer, int dma_buffer_count) {
+  DMA1->CPAR1 = (uint32_t)(&ADC1->DR);
+  DMA1->CMAR1 = (uint32_t)(dma_buffer);
+  DMA1->CNDTR1 = dma_buffer_count;
+  DMA1->CCR1 =
+    DMA_CCR_TCIE |
+    DMA_CCR_HTIE |
+    DMA_CCR_TEIE |
+    DMA_CCR_DIR_FROM_PERIPHERAL |
+    DMA_CCR_CIRC |
+    DMA_CCR_PSIZE_16 |
+    DMA_CCR_MSIZE_16 |
+    DMA_CCR_PL_LOW;
+  DMA1->CCR1 |= DMA_CCR_EN;
+  ADC1->CR2 |= ADC_CR2_DMA;
+}
+
+static inline void AdcOn(void) {
   ADC1->CR2 |= ADC_CR2_ADON;
 }
 
-static inline void AdcOff(void ) {
+static inline void AdcOff(void) {
   ADC1->CR2 &= ~ADC_CR2_ADON;
 }
 
