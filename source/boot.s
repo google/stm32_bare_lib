@@ -45,8 +45,57 @@ limitations under the License.
 .word OnSysTick      // SysTick.
 .word _infinite_loop // IRQ0.
 .word _infinite_loop // IRQ1.
-.word _infinite_loop //
-.word _infinite_loop //
+.word _infinite_loop // IRQ2.
+.word _infinite_loop // IRQ3.
+.word _infinite_loop // IRQ4.
+.word _infinite_loop // IRQ5.
+.word _infinite_loop // IRQ6.
+.word _infinite_loop // IRQ7.
+.word _infinite_loop // IRQ8.
+.word _infinite_loop // IRQ9.
+.word _infinite_loop // IRQ10.
+.word _infinite_loop // IRQ11.
+.word _infinite_loop // IRQ12.
+.word _infinite_loop // IRQ13.
+.word _infinite_loop // IRQ14.
+.word _infinite_loop // IRQ15.
+.word _infinite_loop // IRQ16.
+.word _infinite_loop // IRQ17.
+.word OnAdcInterrupt // IRQ18.
+.word _infinite_loop // IRQ19.
+.word _infinite_loop // IRQ20.
+.word _infinite_loop // IRQ21.
+.word _infinite_loop // IRQ22.
+.word _infinite_loop // IRQ23.
+.word _infinite_loop // IRQ24.
+.word _infinite_loop // IRQ25.
+.word _infinite_loop // IRQ26.
+.word _infinite_loop // IRQ27.
+.word _infinite_loop // IRQ28.
+.word _infinite_loop // IRQ29.
+.word _infinite_loop // IRQ30.
+.word _infinite_loop // IRQ31.
+.word _infinite_loop // IRQ32.
+.word _infinite_loop // IRQ33.
+.word _infinite_loop // IRQ34.
+.word _infinite_loop // IRQ35.
+.word _infinite_loop // IRQ36.
+.word _infinite_loop // IRQ37.
+.word _infinite_loop // IRQ38.
+.word _infinite_loop // IRQ39.
+.word _infinite_loop // IRQ40.
+.word _infinite_loop // IRQ41.
+.word _infinite_loop // IRQ42.
+.word _infinite_loop // IRQ43.
+.word _infinite_loop // IRQ44.
+.word _infinite_loop // IRQ45.
+.word _infinite_loop // IRQ46.
+.word _infinite_loop // IRQ47.
+.word _infinite_loop // IRQ48.
+.word _infinite_loop // IRQ49.
+.word _infinite_loop // IRQ50.
+.word _infinite_loop // IRQ51.
+.word _infinite_loop // IRQ52.
 
 _infinite_loop:   b _infinite_loop
 
@@ -57,3 +106,6 @@ _on_reset_asm:
 // arguments.
   bl OnReset
   b .
+
+.weak OnAdcInterrupt
+.thumb_set OnAdcInterrupt, _infinite_loop

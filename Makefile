@@ -45,7 +45,8 @@ LDFLAGS := -T stm32_linker_layout.lds
 all: \
 $(BINDIR)/examples/blink.bin \
 $(BINDIR)/examples/hello_world.bin \
-$(BINDIR)/examples/benchmark_arithmetic.bin
+$(BINDIR)/examples/benchmark_arithmetic.bin \
+$(BINDIR)/examples/adc_interrupt.bin
 
 clean:
 	rm -rf $(GENDIR)
@@ -111,3 +112,12 @@ $(addprefix $(OBJDIR), $(patsubst %.c,%.o,$(patsubst %.s,%.o,$(BENCHMARK_ARITHME
 $(ELFDIR)/examples/benchmark_arithmetic.elf: $(BENCHMARK_ARITHMETIC_OBJS)
 	@mkdir -p $(dir $@)
 	$(LD) $(LDFLAGS) -o $@ $(BENCHMARK_ARITHMETIC_OBJS)
+
+# Interrupt-driven ADC example.
+ADC_INTERRUPT_SRCS := $(wildcard examples/adc_interrupt/*.c)
+ADC_INTERRUPT_OBJS := $(LIBRARY_OBJS) \
+$(addprefix $(OBJDIR), $(patsubst %.c,%.o,$(patsubst %.s,%.o,$(ADC_INTERRUPT_SRCS))))
+
+$(ELFDIR)/examples/adc_interrupt.elf: $(ADC_INTERRUPT_OBJS)
+	@mkdir -p $(dir $@)
+	$(LD) $(LDFLAGS) -o $@ $(ADC_INTERRUPT_OBJS)

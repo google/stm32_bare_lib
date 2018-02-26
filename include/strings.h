@@ -85,4 +85,15 @@ static inline char* StrCatUInt32(char* main, int main_max_length, uint32_t numbe
   StrCatStr(main, main_max_length, number_string);
 }
 
+static inline void StrCpy(char* main, int main_max_length, const char* source) {
+  char* current = main;
+  char* current_end = main + (main_max_length - 1);
+  while ((*source != 0) && (current < current_end)) {
+    *current = *source;
+    ++current;
+    ++source;
+  }
+  *current = 0;  
+}
+
 #endif  // INCLUDE_STRINGS_H
