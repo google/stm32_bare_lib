@@ -17,16 +17,18 @@ limitations under the License.
 #include "debug_log.h"
 
 #define DMA_BUFFER_SIZE (1024)
-uint16_t* g_dma_buffer[DMA_BUFFER_SIZE];
+uint16_t g_dma_buffer[DMA_BUFFER_SIZE];
 
 int32_t g_error_count;
 int32_t g_half_count;
 int32_t g_complete_count;
+int32_t g_current_volume;
 
 void OnReset(void) {
   g_error_count = 0;
   g_half_count = 0;
   g_complete_count = 0;
+  g_current_volume = 0;
   
   // Start up the clock system.
   RccInitForAdc();
@@ -40,6 +42,8 @@ void OnReset(void) {
     const int32_t adc_log_length = 256;
     char adc_log[adc_log_length];
     StrCpy(adc_log, adc_log_length, "DMA: ");
+    StrCatInt32(adc_log, adc_log_length, g_current_volume, 10);
+    StrCatStr(adc_log, adc_log_length, " volume, ");
     StrCatInt32(adc_log, adc_log_length, g_error_count, 10);
     StrCatStr(adc_log, adc_log_length, " errors, ");
     StrCatInt32(adc_log, adc_log_length, g_half_count, 10);
@@ -51,6 +55,31 @@ void OnReset(void) {
   AdcOff();
 }
 
+void ProcessDmaBuffer(const uint16_t* buffer, int start_index, int end_index) {
+  const uint16_t* start = (buffer + start_index);
+  const uint16_t* current;
+  const uint16_t* const end = (buffer + end_index);
+  int32_t total = 0;
+  for (current = start; current != end; ++current) {
+    total += *current;
+  }
+  const int count = (end_index - start_index);
+  const int32_t mean = (total / count);
+  uint32_t total_volume = 0;
+  for (current = start; current != end; ++current) {
+    const uint16_t current_value = *current;
+    const int32_t delta = (current_value - mean);
+    int32_t abs_delta;
+    if (delta < 0) {
+      abs_delta = - delta;
+    } else {
+      abs_delta = delta;
+    }
+    total_volume += abs_delta;
+  }
+  g_current_volume = (total_volume / count);
+}
+
 void OnDma1Channel1Interrupt() {
   if (DMA1->ISR & DMA_ISR_TEIF1) {
     ++g_error_count;
@@ -60,11 +89,13 @@ void OnDma1Channel1Interrupt() {
   if (DMA1->ISR & DMA_ISR_HTIF1) {
     ++g_half_count;
     DMA1->IFCR |= DMA_IFCR_CHTIF1;
+    ProcessDmaBuffer(g_dma_buffer, 0, (DMA_BUFFER_SIZE / 2));
     return;
   }
   if (DMA1->ISR & DMA_ISR_TCIF1) {
     ++g_complete_count;
     DMA1->IFCR |= DMA_IFCR_CTCIF1;
+    ProcessDmaBuffer(g_dma_buffer, (DMA_BUFFER_SIZE / 2), DMA_BUFFER_SIZE);
     return;
   }
 }
