@@ -15,7 +15,7 @@ limitations under the License.
 #include "adc.h"
 #include "debug_log.h"
 
-void OnReset(void) {
+void main(void) {
   // Start up the clock system.
   RccInitForAdc();
 

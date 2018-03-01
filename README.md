@@ -223,7 +223,7 @@ shift = 536891384
 old_config = 2101681877
 cleared_config = 172
 ```
-Then you can rerun the program 
+Then you can rerun the program. Never use run, always use load and then continue.
 ```
 (gdb) cont
 Continuing.

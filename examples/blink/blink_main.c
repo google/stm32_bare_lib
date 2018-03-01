@@ -16,9 +16,9 @@ limitations under the License.
 #include "led.h"
 #include "timers.h"
 
-// You need a function named "OnReset" in your program to act like "main" in
+// You need a function named "main" in your program to act like "main" in
 // traditional C. This will be called when the processor starts up.
-void OnReset(void) {
+void main(void) {
   // Before the LED can be accessed, the device registers need to be set up.
   LedInit();
   // We'll keep looping forever, turning the LED on and off.

@@ -25,7 +25,7 @@ limitations under the License.
 static char foo_static[] = {'s','t','a','t','i','c','\n'};
 static long zeros[4];
 
-void OnReset(void) {
+void main(void) {
   // Output "Hello World!" to the OpenOCD console.
   // This call can take hundreds of milliseconds, so don't use it in
   // performance-critical code!

@@ -51,7 +51,6 @@ LDFLAGS := -T stm32_linker_layout.lds  -Wl,-Map=gen/$(TARGET).map,--cref -Wl,--g
 # The order of boot.s is important, since it needs to be first in linking
 # order, since it has to be at the start of flash memory when the chip is reset
 LIBRARY_SRCS := \
-$(wildcard source/boot.s) \
 $(wildcard source/*.c)
 LIBRARY_OBJS := $(addprefix $(OBJDIR), \
 $(patsubst %.c,%.o,$(patsubst %.s,%.o,$(LIBRARY_SRCS))))

@@ -16,9 +16,9 @@ limitations under the License.
 #include "adc.h"
 #include "debug_log.h"
 
-// You need a function named "OnReset" in your program to act like "main" in
+// You need a function named "main" in your program to act like "main" in
 // traditional C. This will be called when the processor starts up.
-void OnReset(void) {
+void main(void) {
   // Start up the clock system.
   RccInitForAdc();
 
@@ -34,7 +34,7 @@ void OnReset(void) {
 
 // If you have a function named OnAdcInterrupt() in your program, this will be
 // called once an ADC value is available, if you've set up the system as shown
-// in the OnReset() function above.
+// in the main() function above.
 void OnAdcInterrupt() {
   // We're expecting an EOC signal to be marked in the status register.
   if (!(ADC1->SR & ADC_SR_EOC)) {

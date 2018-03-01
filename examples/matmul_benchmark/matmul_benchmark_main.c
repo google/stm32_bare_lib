@@ -209,7 +209,7 @@ static inline void BenchmarkReferenceGemm(int m, int n, int k) {
   DebugLog(adc_log);
 }
 
-void OnReset(void) {
+void main(void) {
   // Start up the clock system.
   RccInitForAdc();
 

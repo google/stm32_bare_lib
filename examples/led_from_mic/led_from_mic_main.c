@@ -25,7 +25,7 @@ int32_t g_half_count;
 int32_t g_complete_count;
 int32_t g_current_volume;
 
-void OnReset(void) {
+void main(void) {
   g_error_count = 0;
   g_half_count = 0;
   g_complete_count = 0;

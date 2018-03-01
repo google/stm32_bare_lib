@@ -18,7 +18,7 @@ limitations under the License.
 #include "timers.h"
 
 // The function that's called when the chip is started.
-void OnReset(void) {
+void main(void) {
   // Set up SysTick to call back every millisecond.
   g_tick_count = 0;
   SysTick_Config(CLOCK_RATE / 10000);

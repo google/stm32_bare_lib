@@ -249,7 +249,7 @@ static inline void BenchmarkSmallReferenceConv() {
 
 char adc_log[ADC_LOG_LENGTH];
 
-void OnReset(void) {
+void main(void) {
   // Start up the clock system.
   RccInitForAdc();
 
