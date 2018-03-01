@@ -1,6 +1,7 @@
 # STM32 Bare Library
 
 System functions and example code for programming the "Blue Pill" STM32-compatible micro-controller boards.
+This is not an officially supported Google product.
 
 ## Introduction
 
