@@ -13,12 +13,12 @@ DEPDIR := $(GENDIR)/dep/
 CROSS_PREFIX := arm-none-eabi
 AS := $(CROSS_PREFIX)-as
 CC := $(CROSS_PREFIX)-gcc
-LD := $(CROSS_PREFIX)-ld.bfd
+LD := $(CROSS_PREFIX)-gcc
 OBJCOPY := $(CROSS_PREFIX)-objcopy
 
 # Debug symbols are enabled with -g, but since we compile ELFs down to bin files, these don't
 # affect the code size on-device.
-CCFLAGS := -mcpu=cortex-m3 -mthumb -g -O3
+CCFLAGS := -mcpu=cortex-m3 -mthumb -g -gdwarf-2
 
 # Used to rebuild when headers used by a source file change.
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.Td
@@ -39,7 +39,12 @@ INCLUDES := \
 ASFLAGS :=
 
 # Defines the offsets used when linking binaries for the STM32.
-LDFLAGS := -T stm32_linker_layout.lds
+
+LDFLAGS := -T stm32_linker_layout.lds  -Wl,-Map=gen/$(TARGET).map,--cref -Wl,--gc-sections
+
+# Use this to do libc
+# LDFLAGS += -specs rdimon.specs -lc -lm -lrdimon -mfloat-abi=soft
+
 
 
 # Library source files.

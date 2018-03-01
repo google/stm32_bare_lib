@@ -199,19 +199,62 @@ You can then debug a program by executing:
 
 ```
 cd ~/stm32_bare_lib/
-arm-none-eabi-gdb --eval-command="target remote localhost:3333" gen/elf/examples/blink.elf
+arm-none-eabi-gdb gen/elf/examples/blink.elf
 ```
 
 You should see a gdb prompt, and you can execute commands to inspect variables:
 
+For example, recompile and load the binary to the device again
 ```
-(gdb) info locals
+(gdb) make
+...
+(gdb) load
+target halted due to debug-request, current mode: Thread 
+xPSR: 0x01000000 pc: 0x080001c4 msp: 0x20005000, semihosting
+Loading section .interrupt_vector, size 0x118 lma 0x8000000
+Loading section .text, size 0x190 lma 0x8000118
+Loading section .init, size 0xc lma 0x80002a8
+Loading section .fini, size 0xc lma 0x80002b4
+target halted due to debug-request, current mode: Thread 
+xPSR: 0x01000000 pc: 0x080001c4 msp: 0x20005000, semihosting
+Start address 0x80001c4, load size 704
+Transfer rate: 3 KB/sec, 176 bytes/write.
 shift = 536891384
 old_config = 2101681877
 cleared_config = 172
 ```
+Then you can rerun the program 
+```
+(gdb) cont
+Continuing.
+```
 
-If the program has crashed, you should also be able to inspect the call stack. I haven't found it easy to step through programs or continue execution though.
+And interrupt it...
+```
+(PRESS CTRL-C)
+Program received signal SIGINT, Interrupt.
+0x08000276 in BusyWaitMicroseconds (us=200000) at ./include/timers.h:37
+37	  for (; count > 0; --count)
+```
+
+Inspect variables...
+```
+(gdb) p count
+$1 = 103869
+```
+
+Inspect the stack...
+```
+(gdb) backtrace 
+#0  0x08000272 in BusyWaitMicroseconds (us=200000) at ./include/timers.h:37
+#1  0x08000296 in OnReset () at examples/blink/blink_main.c:30
+#2  0x080001d4 in _main () at source/startup.c:66
+```
+
+
+Set breakpoints, inspect stacks, etc. all like you do in normal self-hosted gdb.
+
+
 
 ## Using the Library
 

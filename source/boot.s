@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 /* Copyright 2018 Google Inc. All Rights Reserved.
+=======
+/* Copyright 2018 Pete Warden, TensorFlow Authors. All Rights Reserved.
+>>>>>>> Improve bare metal (linker script, debugging)
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -24,15 +28,16 @@ limitations under the License.
 // .bin has this table of vectors right at the start. If you don't ensure this,
 // you'll see weird hangs when you reset the device.	
 
-.cpu cortex-m3
-.thumb
+	.section .interrupt_vector,"a",%progbits
+	.cpu cortex-m3
+	.thumb
 
-.word 0x20005000     // Stack start address, at the top of SRAM.
-.word _on_reset_asm  // Reset.
+.word _ld_stack_end_addr // 0x20005000     // Stack start address, at the top of SRAM.
+.word _main // Reset.
 .word _infinite_loop // NMI.
-.word _infinite_loop // Hard Fault.
-.word _infinite_loop // MM Fault.
-.word _infinite_loop // Bus Fault.
+.word _hard_fault_handler // Hard Fault.
+.word _mem_fault_handler // MM Fault.
+.word _bus_fault_handler // Bus Fault.
 .word _infinite_loop // Usage Fault.
 .word _infinite_loop // Unused.
 .word _infinite_loop // Unused.
@@ -98,14 +103,6 @@ limitations under the License.
 .word _infinite_loop // IRQ52.
 
 _infinite_loop:   b _infinite_loop
-
-.thumb_func
-_on_reset_asm:
-// OnReset() should be a C-linkage function symbol that's defined elsewhere in
-// your program. It works like main() in a non-embedded context, but with no
-// arguments.
-  bl OnReset
-  b .
 
 .weak OnAdcInterrupt
 .thumb_set OnAdcInterrupt, _infinite_loop
