@@ -40,6 +40,9 @@ static inline void EnableNvic(int irq) {
 
 // Sets up the clock control system for ADC access.
 static inline void RccInitForAdc(void) {
+  // Here we're asking the chip to run at 72 MHz. The PLL controls the
+  // main chip's speed, so to get 72MHz we set the source of the PLL to
+  // be the HSE clock, which is 8MHz, with a multiplier of x9.
   RCC->CFGR =
     RCC_CFGR_PLLSRC_HSE |
     RCC_CFGR_PLLMUL_9 |
@@ -56,13 +59,24 @@ static inline void RccInitForAdc(void) {
   // and a two-clock wait for access.
   *FLASH_ACR = FLASH_ACR_PRFTBE | FLASH_ACR_LATENCY_2;
 
+  // The ADC clock speed is:
+  // SYSCLOCK / AHB Prescaler / APB2 Prescaler / ADC Prescaler.
+  // In this case, we want 16KHz for the ADC, so:
+  // 72MHz / 2 (HPRE_DIV_2) / 4 (PPRE2_DIV_4) / 8 (ADCPRE_DIV_8)
+  // = 1.125MHz
+  // Total conversion time = Sampling time + 12.5 cycles
+  // So, if we pick a sampling time of 55.5, total is 68.
+  // 1.125MHz / 68 = 16.5KHz.
+  // We need to set the sampling time in the ADC registers. This is done
+  // in the ADC initialization routine below.
   RCC->CFGR =
     RCC_CFGR_PLLSRC_HSE |
     RCC_CFGR_PLLMUL_9 |
     RCC_CFGR_SW_PLL |
+    RCC_CFGR_PPRE2_DIV_4 |
     RCC_CFGR_ADCPRE_DIV_8 |
     RCC_CFGR_HPRE_DIV_2;
-
+  
   RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
 
   RCC->APB2ENR |= RCC_APB2ENR_IOPAEN;
@@ -93,6 +107,9 @@ static inline void AdcInit(GPIO_t* gpio, int port, int do_interrupt) {
   while (ADC1->CR2 & ADC_CR2_CAL) {
   }
 
+  // TODO - I'm assuming the ADC is on channel 0 here.
+  ADC1->SMPR2 = ADC_SMPR2_SMP0_55_5_CYCLES;
+  
   ADC1->CR2 |= ADC_CR2_ADON;
   
   SetGpioMode(gpio, port, GPIO_MODE_INPUT_ANALOG);
