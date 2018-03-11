@@ -123,6 +123,30 @@ typedef struct {
   __IO uint32_t UNUSED7;
 } DMA_t;
 
+// Timer register layout.
+typedef struct {
+  __IO uint32_t CR1;
+  __IO uint32_t CR2;
+  __IO uint32_t SMCR;
+  __IO uint32_t DIER;
+  __IO uint32_t SR;
+  __IO uint32_t EGR;
+  __IO uint32_t CCMR1;
+  __IO uint32_t CCMR2;
+  __IO uint32_t CCER;
+  __IO uint32_t CNT;
+  __IO uint32_t PSC;
+  __IO uint32_t ARR;
+  __IO uint32_t RCR;
+  __IO uint32_t CCR1;
+  __IO uint32_t CCR2;
+  __IO uint32_t CCR3;
+  __IO uint32_t CCR4;
+  __IO uint32_t CDTR;
+  __IO uint32_t DCR;
+  __IO uint32_t DMAR;
+} TIM_t;
+
 // Addresses of peripherals.
 #define RCC_BASE ((uint32_t)0x40021000)
 #define GPIOA_BASE ((uint32_t)0x40010800)
@@ -130,6 +154,13 @@ typedef struct {
 #define GPIOC_BASE ((uint32_t)0x40011000)
 #define ADC1_BASE ((uint32_t)0x40012400)
 #define ADC2_BASE ((uint32_t)0x40012800)
+#define TIM1_BASE ((uint32_t)0x40012C00)
+#define TIM2_BASE ((uint32_t)0x40000000)
+#define TIM3_BASE ((uint32_t)0x40000400)
+#define TIM4_BASE ((uint32_t)0x40000800)
+#define TIM5_BASE ((uint32_t)0x40000c00)
+#define TIM6_BASE ((uint32_t)0x40001000)
+#define TIM7_BASE ((uint32_t)0x40001400)
 #define FLASH_ACR_BASE ((uint32_t)0x40022000)
 #define DMA1_BASE ((uint32_t)0x40020000)
 #define DMA2_BASE ((uint32_t)0x40020400)
@@ -144,6 +175,13 @@ typedef struct {
 #define FLASH_ACR ((volatile uint32_t*)FLASH_ACR_BASE)
 #define DMA1 ((DMA_t*)DMA1_BASE)
 #define DMA2 ((DMA_t*)DMA2_BASE)
+#define TIM1 ((TIM_t*)TIM1_BASE)
+#define TIM2 ((TIM_t*)TIM2_BASE)
+#define TIM3 ((TIM_t*)TIM3_BASE)
+#define TIM4 ((TIM_t*)TIM4_BASE)
+#define TIM5 ((TIM_t*)TIM5_BASE)
+#define TIM6 ((TIM_t*)TIM6_BASE)
+#define TIM7 ((TIM_t*)TIM7_BASE)
 
 // GPIO settings.
 #define GPIO_MODE_OUT_2 (0x2)
@@ -455,7 +493,7 @@ typedef struct {
 #define RCC_APB2ENR_TIM8EN (1 << 13)
 #define RCC_APB2ENR_USART1EN (1 << 14)
 #define RCC_APB2ENR_ADC3EN (1 << 15)
-#define RCC_APB2ENR_TIM91EN (1 << 19)
+#define RCC_APB2ENR_TIM9EN (1 << 19)
 #define RCC_APB2ENR_TIM10EN (1 << 20)
 #define RCC_APB2ENR_TIM11EN (1 << 21)
 
@@ -540,5 +578,56 @@ typedef struct {
 #define DMA_IFCR_CTCIF7 (1 << 25)
 #define DMA_IFCR_CHTIF7 (1 << 26)
 #define DMA_IFCR_CTEIF7 (1 << 27)
+
+// Timer Control Register #1 flag values.
+#define TIM_CR1_CEN (1 << 0)
+#define TIM_CR1_UDIS (1 << 1)
+#define TIM_CR1_URS (1 << 2)
+#define TIM_CR1_OPM (1 << 3)
+#define TIM_CR1_DIR_UP (0 << 4)
+#define TIM_CR1_DIR_DOWN (0 << 4)
+#define TIM_CR1_CMS_EDGE (0 << 5)
+#define TIM_CR1_CMS_MODE1 (1 << 5)
+#define TIM_CR1_CMS_MODE2 (2 << 5)
+#define TIM_CR1_CMS_MODE3 (3 << 5)
+#define TIM_CR1_ARPE (1 << 7)
+#define TIM_CR1_CKD_DIV1 (0 << 8)
+#define TIM_CR1_CKD_DIV2 (1 << 8)
+#define TIM_CR1_CKD_DIV4 (2 << 8)
+
+// Timer Control Register #2 flag values.
+#define TIM_CR2_CCPC (1 << 0)
+#define TIM_CR2_CCUS (1 << 2)
+#define TIM_CR2_CCDS (1 << 3)
+#define TIM_CR2_MMS_RESET (0 << 4)
+#define TIM_CR2_MMS_ENABLE (1 << 4)
+#define TIM_CR2_MMS_UPDATE (2 << 4)
+#define TIM_CR2_MMS_COMPARE_PULSE (3 << 4)
+#define TIM_CR2_MMS_COMPARE_OC1 (4 << 4)
+#define TIM_CR2_MMS_COMPARE_OC2 (5 << 4)
+#define TIM_CR2_MMS_COMPARE_OC3 (6 << 4)
+#define TIM_CR2_MMS_COMPARE_OC4 (7 << 4)
+#define TIM_CR2_MMS_TI1S (1 << 7)
+#define TIM_CR2_MMS_OIS1 (1 << 8)
+#define TIM_CR2_MMS_OIS1N (1 << 9)
+#define TIM_CR2_MMS_OIS2 (1 << 10)
+#define TIM_CR2_MMS_OIS2N (1 << 11)
+#define TIM_CR2_MMS_OIS3 (1 << 12)
+#define TIM_CR2_MMS_OIS3N (1 << 13)
+#define TIM_CR2_MMS_OIS4 (1 << 14)
+
+// Timer Status Register flag values.
+#define TIM_SR_UIF (1 << 0)
+#define TIM_SR_CC1IF (1 << 1)
+#define TIM_SR_CC2IF (1 << 2)
+#define TIM_SR_CC3IF (1 << 3)
+#define TIM_SR_CC4IF (1 << 4)
+#define TIM_SR_COMIF (1 << 5)
+#define TIM_SR_TIF (1 << 6)
+#define TIM_SR_BIF (1 << 7)
+#define TIM_SR_CC1OF (1 << 9)
+#define TIM_SR_CC2OF (1 << 9)
+#define TIM_SR_CC3OF (1 << 9)
+#define TIM_SR_CC4OF (1 << 9)
 
 #endif  // INCLUDE_STM32_SPECIFICS_H
