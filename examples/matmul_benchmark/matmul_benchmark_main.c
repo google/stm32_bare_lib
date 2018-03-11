@@ -10,7 +10,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-// Times running convolutions.
+// Times running matrix multiplications.
 
 #include "adc.h"
 #include "debug_log.h"
@@ -129,12 +129,12 @@ static inline void BenchmarkSmallReferenceGemm() {
     			     c_data, 0, 1, 0, c_cols);
   }
   volatile uint16_t duration = TimerGetCounter(TIMERID_TIM1) - start_time;
-  const int32_t microseconds = (duration * repetitions) / 1000;
-  const int32_t op_count = a_rows * b_rows * a_cols * 2;
-  const int32_t ops_per_second = (op_count * 1000000) / microseconds; 
+  const int32_t microseconds_per_gemm = (duration * 1000) / repetitions;
+  const int32_t op_count = a_rows * b_cols * a_cols * 2;
+  const int32_t ops_per_second = (op_count * 1000000) / microseconds_per_gemm; 
   char adc_log[ADC_LOG_LENGTH];
   StrCpy(adc_log, ADC_LOG_LENGTH, "Small ReferenceGemm took: ");
-  StrCatInt32(adc_log, ADC_LOG_LENGTH, microseconds, 10);
+  StrCatInt32(adc_log, ADC_LOG_LENGTH, microseconds_per_gemm, 10);
   StrCatStr(adc_log, ADC_LOG_LENGTH, "us (");
   StrCatInt32(adc_log, ADC_LOG_LENGTH, op_count, 10);
   StrCatStr(adc_log, ADC_LOG_LENGTH, " ops, ");
@@ -181,22 +181,18 @@ static inline void BenchmarkReferenceGemm(int m, int n, int k) {
   const int c_cols = n;
   uint8_t c_data[c_rows * c_cols * 10];
 
-  const int repetitions = 10;
+  const int repetitions = 1000;
   const uint16_t start_time = TimerGetCounter(TIMERID_TIM1);
   for (int i = 0; i < repetitions; ++i) {
     ReferenceEightBitIntGemm(0, 0, 0, a_rows, b_cols, a_cols,
     			     a_data, 0, a_cols,
     			     b_data, 0, b_cols,
     			     c_data, 0, 1, 0, c_cols);
-    volatile uint8_t unused = c_data[0];
   }
   const uint16_t duration = TimerGetCounter(TIMERID_TIM1) - start_time;
-  LOG_INT32(start_time);
-  LOG_INT32(duration);
-
-  const int32_t microseconds = (duration * repetitions) / 1000;
-  const int32_t op_count = a_rows * b_rows * a_cols * 2;
-  const int32_t ops_per_second = (op_count * 1000000) / microseconds; 
+  const int32_t microseconds_per_gemm = (duration * 1000) / repetitions;
+  const int32_t op_count = a_rows * b_cols * a_cols * 2;
+  const int32_t ops_per_second = ((op_count * 1000) / microseconds_per_gemm) * 1000; 
   StrCpy(adc_log, ADC_LOG_LENGTH, "ReferenceGemm(");
   StrCatInt32(adc_log, ADC_LOG_LENGTH, m, 10);
   StrCatStr(adc_log, ADC_LOG_LENGTH, ", ");
@@ -204,7 +200,7 @@ static inline void BenchmarkReferenceGemm(int m, int n, int k) {
   StrCatStr(adc_log, ADC_LOG_LENGTH, ", ");
   StrCatInt32(adc_log, ADC_LOG_LENGTH, k, 10);
   StrCatStr(adc_log, ADC_LOG_LENGTH, ") took: ");
-  StrCatInt32(adc_log, ADC_LOG_LENGTH, microseconds, 10);
+  StrCatInt32(adc_log, ADC_LOG_LENGTH, microseconds_per_gemm, 10);
   StrCatStr(adc_log, ADC_LOG_LENGTH, "us (");
   StrCatInt32(adc_log, ADC_LOG_LENGTH, op_count, 10);
   StrCatStr(adc_log, ADC_LOG_LENGTH, " ops, ");
@@ -221,5 +217,13 @@ void OnReset(void) {
 
   BenchmarkSmallReferenceGemm();
 
-  BenchmarkReferenceGemm(50, 50, 30);
+  BenchmarkReferenceGemm(5, 5, 5);
+  BenchmarkReferenceGemm(10, 10, 10);
+  BenchmarkReferenceGemm(15, 15, 15);
+  
+  BenchmarkReferenceGemm(25, 25, 5);
+  BenchmarkReferenceGemm(5, 25, 25);
+  BenchmarkReferenceGemm(25, 5, 25);
+
+  BenchmarkReferenceGemm(25, 25, 20);
 }
