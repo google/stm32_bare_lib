@@ -29,7 +29,7 @@ OpenOCD doesn't have a binary package for the Pi, but it is easy to compile. To 
 
 ```
 sudo apt-get update
-sudo apt-get install git autoconf libtool make pkg-config libusb-1.0-0 libusb-1.0-0-dev
+sudo apt-get install git autoconf libtool make pkg-config libusb-1.0-0 libusb-1.0-0-dev telnet
 git clone git://git.code.sf.net/p/openocd/code openocd-code
 cd openocd-code
 ./bootstrap
