@@ -71,7 +71,7 @@ Now you should be ready to build some example programs for the Blue Pill board. 
 ```
 cd ~
 git clone https://github.com/ARM-software/CMSIS_5
-git clone https://github.com/petewarden/stm32_bare_lib
+git clone https://github.com/google/stm32_bare_lib
 sudo apt-get install -y gcc-arm-none-eabi
 ```
 
