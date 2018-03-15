@@ -199,7 +199,7 @@ You can then debug a program by executing:
 
 ```
 cd ~/stm32_bare_lib/
-arm-none-eabi-gdb gen/elf/examples/blink.elf
+arm-none-eabi-gdb -iex 'add-auto-load-safe-path .' gen/elf/examples/blink.elf
 ```
 
 You should see a gdb prompt, and you can execute commands to inspect variables:
