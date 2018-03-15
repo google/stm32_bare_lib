@@ -134,11 +134,11 @@ static inline void BenchmarkSmallReferenceGemm() {
   const int32_t ops_per_second = (op_count * 1000000) / microseconds_per_gemm; 
   char adc_log[ADC_LOG_LENGTH];
   StrCpy(adc_log, ADC_LOG_LENGTH, "Small ReferenceGemm took: ");
-  StrCatInt32(adc_log, ADC_LOG_LENGTH, microseconds_per_gemm, 10);
+  StrCatInt32(adc_log, ADC_LOG_LENGTH, microseconds_per_gemm);
   StrCatStr(adc_log, ADC_LOG_LENGTH, "us (");
-  StrCatInt32(adc_log, ADC_LOG_LENGTH, op_count, 10);
+  StrCatInt32(adc_log, ADC_LOG_LENGTH, op_count);
   StrCatStr(adc_log, ADC_LOG_LENGTH, " ops, ");
-  StrCatInt32(adc_log, ADC_LOG_LENGTH, ops_per_second, 10);
+  StrCatInt32(adc_log, ADC_LOG_LENGTH, ops_per_second);
   StrCatStr(adc_log, ADC_LOG_LENGTH, " ops/s)\n ");
   DebugLog(adc_log);
 
@@ -147,11 +147,11 @@ static inline void BenchmarkSmallReferenceGemm() {
     if (expected_c_data[i] != c_data[i]) {
       char adc_log[ADC_LOG_LENGTH];
       StrCpy(adc_log, ADC_LOG_LENGTH, "Error: c_data[");
-      StrCatInt32(adc_log, ADC_LOG_LENGTH, i, 10);
+      StrCatInt32(adc_log, ADC_LOG_LENGTH, i);
       StrCatStr(adc_log, ADC_LOG_LENGTH, "](");
-      StrCatInt32(adc_log, ADC_LOG_LENGTH, c_data[i], 10);
+      StrCatInt32(adc_log, ADC_LOG_LENGTH, c_data[i]);
       StrCatStr(adc_log, ADC_LOG_LENGTH, ") != ");
-      StrCatInt32(adc_log, ADC_LOG_LENGTH, expected_c_data[i], 10);
+      StrCatInt32(adc_log, ADC_LOG_LENGTH, expected_c_data[i]);
       StrCatStr(adc_log, ADC_LOG_LENGTH, "\r\n");
       DebugLog(adc_log);
     }	
@@ -194,17 +194,17 @@ static inline void BenchmarkReferenceGemm(int m, int n, int k) {
   const int32_t op_count = a_rows * b_cols * a_cols * 2;
   const int32_t ops_per_second = ((op_count * 1000) / microseconds_per_gemm) * 1000; 
   StrCpy(adc_log, ADC_LOG_LENGTH, "ReferenceGemm(");
-  StrCatInt32(adc_log, ADC_LOG_LENGTH, m, 10);
+  StrCatInt32(adc_log, ADC_LOG_LENGTH, m);
   StrCatStr(adc_log, ADC_LOG_LENGTH, ", ");
-  StrCatInt32(adc_log, ADC_LOG_LENGTH, n, 10);
+  StrCatInt32(adc_log, ADC_LOG_LENGTH, n);
   StrCatStr(adc_log, ADC_LOG_LENGTH, ", ");
-  StrCatInt32(adc_log, ADC_LOG_LENGTH, k, 10);
+  StrCatInt32(adc_log, ADC_LOG_LENGTH, k);
   StrCatStr(adc_log, ADC_LOG_LENGTH, ") took: ");
-  StrCatInt32(adc_log, ADC_LOG_LENGTH, microseconds_per_gemm, 10);
+  StrCatInt32(adc_log, ADC_LOG_LENGTH, microseconds_per_gemm);
   StrCatStr(adc_log, ADC_LOG_LENGTH, "us (");
-  StrCatInt32(adc_log, ADC_LOG_LENGTH, op_count, 10);
+  StrCatInt32(adc_log, ADC_LOG_LENGTH, op_count);
   StrCatStr(adc_log, ADC_LOG_LENGTH, " ops, ");
-  StrCatInt32(adc_log, ADC_LOG_LENGTH, ops_per_second, 10);
+  StrCatInt32(adc_log, ADC_LOG_LENGTH, ops_per_second);
   StrCatStr(adc_log, ADC_LOG_LENGTH, " ops/s)\r\n ");
   DebugLog(adc_log);
 }

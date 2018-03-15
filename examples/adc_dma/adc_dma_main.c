@@ -42,13 +42,13 @@ void main(void) {
     const int32_t adc_log_length = 256;
     char adc_log[adc_log_length];
     StrCpy(adc_log, adc_log_length, "DMA: ");
-    StrCatInt32(adc_log, adc_log_length, g_current_volume, 10);
+    StrCatInt32(adc_log, adc_log_length, g_current_volume);
     StrCatStr(adc_log, adc_log_length, " volume, ");
-    StrCatInt32(adc_log, adc_log_length, g_error_count, 10);
+    StrCatInt32(adc_log, adc_log_length, g_error_count);
     StrCatStr(adc_log, adc_log_length, " errors, ");
-    StrCatInt32(adc_log, adc_log_length, g_half_count, 10);
+    StrCatInt32(adc_log, adc_log_length, g_half_count);
     StrCatStr(adc_log, adc_log_length, " half, ");
-    StrCatInt32(adc_log, adc_log_length, g_complete_count, 10);
+    StrCatInt32(adc_log, adc_log_length, g_complete_count);
     StrCatStr(adc_log, adc_log_length, " complete\n");
     DebugLog(adc_log);
   }

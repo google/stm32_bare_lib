@@ -35,9 +35,7 @@ static inline void DebugLog(char* s) {
 // Writes out a signed 32-bit number to the debug console.
 static inline void DebugLogInt32(int32_t i) {
   char number_string[kFastToBufferSize];
-  number_string[0] = 'b';
-  number_string[1] = 0;
-  FastInt32ToBufferLeft(i, number_string, 10);
+  FastInt32ToBufferLeft(i, number_string);
   DebugLog(number_string);
 }
 
@@ -55,12 +53,13 @@ static inline void DebugLogHex(uint32_t i) {
   DebugLog(number_string);
 }
 
+// An easy way of logging labeled numerical variables for debugging.
 #define LOG_INT32(x) do {                  \
     const int log_length = 64;             \
     char log[log_length];                  \
     StrCpy(log, log_length, #x);           \
     StrCatStr(log, log_length, "=");       \
-    StrCatInt32(log, log_length, x, 10);   \
+    StrCatInt32(log, log_length, x);       \
     StrCatStr(log, log_length, "\n");      \
     DebugLog(log);                         \
   } while (0)

@@ -28,9 +28,9 @@ void main(void) {
     const int32_t adc_log_length = 256;
     char adc_log[adc_log_length];
     StrCpy(adc_log, adc_log_length, "Time: ");
-    StrCatInt32(adc_log, adc_log_length, seconds, 10);
+    StrCatInt32(adc_log, adc_log_length, seconds);
     StrCatStr(adc_log, adc_log_length, ".");
-    StrCatInt32(adc_log, adc_log_length, milliseconds, 10);
+    StrCatInt32(adc_log, adc_log_length, milliseconds);
     StrCatStr(adc_log, adc_log_length, "s\n");
     DebugLog(adc_log);
   }

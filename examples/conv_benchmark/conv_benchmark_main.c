@@ -31,8 +31,8 @@ void ReferenceConv(const uint8_t* input_data,
 		  int output_shift, int output_offset, int output_mult) {
   // Set up some constants we need for the output down-shifting and
   // saturation.
-  const int32_t highest = (1 << 30) - 1;
-  const int32_t lowest = -(1 << 30);
+  const int32_t highest = (1 << 8) - 1;
+  const int32_t lowest = 0;
 
   // When we're converting the 32 bit accumulator to a lower bit depth, we
   // need to add on 0.5 in fixed-point terms to make the operation round half
@@ -140,9 +140,11 @@ void ReferenceConv(const uint8_t* input_data,
 	  const int32_t output =
 	    ((((total + output_offset) * output_mult) + rounding) >>
 	     output_shift);
+	  const int32_t top_clamped_output = (output > highest) ? highest : output;
+	  const int32_t clamped_output = (top_clamped_output < lowest) ? lowest : top_clamped_output;
 	  output_data[(batch * output_height * output_width * filter_count) +
 		      (out_y * output_width * filter_count) +
-		      (out_x * filter_count) + out_channel] = output;
+		      (out_x * filter_count) + out_channel] = clamped_output;
 	}
       }
     }
@@ -198,7 +200,7 @@ static inline void BenchmarkSmallReferenceConv() {
   const int expected_width = image_width;
   const int expected_height = image_height * filter_count;
   const uint8_t expected_data[] =
-    {105, 150, 183, 95, 235, 312, 357, 178, 187, 234, 261, 121};
+    {105, 150, 183, 95, 235, 255 /*312*/, 255 /*357*/, 178, 187, 234, 255 /*261*/, 121};
 
   const int expected_elements = expected_height * expected_width;
   const int output_shift = 0;
@@ -223,11 +225,11 @@ static inline void BenchmarkSmallReferenceConv() {
   const int32_t ops_per_second = (op_count * 1000000) / microseconds_per_conv; 
   char adc_log[ADC_LOG_LENGTH];
   StrCpy(adc_log, ADC_LOG_LENGTH, "Small ReferenceConv took: ");
-  StrCatInt32(adc_log, ADC_LOG_LENGTH, microseconds_per_conv, 10);
+  StrCatInt32(adc_log, ADC_LOG_LENGTH, microseconds_per_conv);
   StrCatStr(adc_log, ADC_LOG_LENGTH, "us (");
-  StrCatInt32(adc_log, ADC_LOG_LENGTH, op_count, 10);
+  StrCatInt32(adc_log, ADC_LOG_LENGTH, op_count);
   StrCatStr(adc_log, ADC_LOG_LENGTH, " ops, ");
-  StrCatInt32(adc_log, ADC_LOG_LENGTH, ops_per_second, 10);
+  StrCatInt32(adc_log, ADC_LOG_LENGTH, ops_per_second);
   StrCatStr(adc_log, ADC_LOG_LENGTH, " ops/s)\n ");
   DebugLog(adc_log);
 
@@ -236,11 +238,11 @@ static inline void BenchmarkSmallReferenceConv() {
     if (expected_data[i] != output_data[i]) {
       char adc_log[ADC_LOG_LENGTH];
       StrCpy(adc_log, ADC_LOG_LENGTH, "Error: output_data[");
-      StrCatInt32(adc_log, ADC_LOG_LENGTH, i, 10);
+      StrCatInt32(adc_log, ADC_LOG_LENGTH, i);
       StrCatStr(adc_log, ADC_LOG_LENGTH, "](");
-      StrCatInt32(adc_log, ADC_LOG_LENGTH, output_data[i], 10);
+      StrCatInt32(adc_log, ADC_LOG_LENGTH, output_data[i]);
       StrCatStr(adc_log, ADC_LOG_LENGTH, ") != ");
-      StrCatInt32(adc_log, ADC_LOG_LENGTH, expected_data[i], 10);
+      StrCatInt32(adc_log, ADC_LOG_LENGTH, expected_data[i]);
       StrCatStr(adc_log, ADC_LOG_LENGTH, "\r\n");
       DebugLog(adc_log);
     }

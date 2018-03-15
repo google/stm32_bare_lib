@@ -16,9 +16,10 @@ CC := $(CROSS_PREFIX)-gcc
 LD := $(CROSS_PREFIX)-gcc
 OBJCOPY := $(CROSS_PREFIX)-objcopy
 
+OPTFLAGS := -O3
 # Debug symbols are enabled with -g, but since we compile ELFs down to bin files, these don't
 # affect the code size on-device.
-CCFLAGS := -mcpu=cortex-m3 -mthumb -g -gdwarf-2
+CCFLAGS := -mcpu=cortex-m3 -mthumb -g -gdwarf-2 $(OPTFLAGS)
 
 # Used to rebuild when headers used by a source file change.
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.Td

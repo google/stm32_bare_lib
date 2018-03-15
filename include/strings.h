@@ -33,7 +33,14 @@ static inline char* ReverseStringInPlace(char* start, char* end) {
 static inline char* FastUInt32ToBufferLeft(uint32_t i, char* buffer, int base) {
   char* start = buffer;
   do {
-    *buffer++ = ((i % base) + '0');
+    int32_t digit = i % base;
+    char character;
+    if (digit < 10) {
+      character = '0' + digit;
+    } else {
+      character = 'a' + (digit - 10);
+    }
+    *buffer++ = character;
     i /= base;
   } while (i > 0);
   *buffer = 0;
@@ -45,13 +52,13 @@ static inline char* FastUInt32ToBufferLeft(uint32_t i, char* buffer, int base) {
 static const int kFastToBufferSize = 48;
 
 // Populates the provided buffer with an ASCII representation of the number.
-static inline char* FastInt32ToBufferLeft(int32_t i, char* buffer, int base) {
+static inline char* FastInt32ToBufferLeft(int32_t i, char* buffer) {
   uint32_t u = i;
   if (i < 0) {
     *buffer++ = '-';
     u = -u;
   }
-  return FastUInt32ToBufferLeft(u, buffer, base);
+  return FastUInt32ToBufferLeft(u, buffer, 10);
 }
 
 // Appends a string to a string, in-place. You need to pass in the maximum string
@@ -72,9 +79,9 @@ static inline char* StrCatStr(char* main, int main_max_length, char* to_append) 
 }
 
 // Converts a number to a string and appends it to another.
-static inline char* StrCatInt32(char* main, int main_max_length, int32_t number, int base) {
+static inline char* StrCatInt32(char* main, int main_max_length, int32_t number) {
   char number_string[kFastToBufferSize];
-  FastInt32ToBufferLeft(number, number_string, base);
+  FastInt32ToBufferLeft(number, number_string);
   StrCatStr(main, main_max_length, number_string);
 }
 

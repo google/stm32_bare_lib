@@ -48,14 +48,16 @@ __attribute__((weak))  void OnDma1Channel7Interrupt() {_infinite_loop();}
 
 // Copy read-write static initialized memory from flash to ram.
 void _load_data_from_flash() {
-  uint32* src = &_ld_data_load_source;
-  for(uint32* dest = &_ld_data_load_dest_start; dest != &_ld_data_load_dest_stop;)
+  // Volatile is important here to make sure the loop isn't optimized away.
+  volatile uint32* src = &_ld_data_load_source;
+  for(volatile uint32* dest = &_ld_data_load_dest_start; dest != &_ld_data_load_dest_stop;)
     *dest++ = *src++;
 }
 
-// "Zero" unitialized data with DEADBEEF
+// "Zero" uninitialized data with DEADBEEF.
 void _zero_initialize_bss_data() {
-  for(uint32* dest = &_ld_bss_data_start; dest != &_ld_bss_data_stop; dest++)
+  // Volatile is important here to make sure the loop isn't optimized away.
+  for(volatile uint32* dest = &_ld_bss_data_start; dest != &_ld_bss_data_stop; dest++)
     *dest = 0xDEADBEEF;
 }
 // Put this in the .text.reset segment so the linker script can
@@ -72,8 +74,9 @@ void _main() {
 // Interrupt vector
 typedef void (*interrupt_fn)();
 __attribute__ ((section(".interrupt_vector")))
-static interrupt_fn interrupts[] = {
-  &_ld_stack_end_addr, // Stack start end size (from linker script)
+// This needs to be marked as volatile, or gcc can strip it out during optimization.
+static volatile interrupt_fn interrupts[] = {
+  (interrupt_fn)&_ld_stack_end_addr, // Stack start end size (from linker script)
   _main, // Reset.
   _infinite_loop, // NMI.
   HardFaultHandler, // Hard Fault.
