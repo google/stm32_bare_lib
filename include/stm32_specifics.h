@@ -52,10 +52,10 @@ typedef struct {
 
 // SysTick control.
 typedef struct {
-  __IO uint32_t CTRL;    // Control and Status.
-  __IOM uint32_t LOAD;   // Reload Value.
-  __IOM uint32_t VAL;    // Current Value.
-  __IM  uint32_t CALIB;  // Calibration.
+  __IO uint32_t CTRL;   // Control and Status.
+  __IOM uint32_t LOAD;  // Reload Value.
+  __IOM uint32_t VAL;   // Current Value.
+  __IM uint32_t CALIB;  // Calibration.
 } SysTick_t;
 
 // ADC register layout.
@@ -388,7 +388,7 @@ typedef struct {
 #define RCC_CR_HSIRDY (1 << 1)
 #define RCC_CR_HSEON (1 << 16)
 #define RCC_CR_HSERDY (1 << 17)
-#define RCC_CR_HSEBYP (1 <<18)
+#define RCC_CR_HSEBYP (1 << 18)
 #define RCC_CR_CSSON (1 << 19)
 #define RCC_CR_PLLON (1 << 24)
 #define RCC_CR_PLLRDY (1 << 25)

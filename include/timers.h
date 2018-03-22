@@ -61,13 +61,7 @@ static inline void BusyWaitMicroseconds(int32_t us) {
 // have to do a lookup.
 static inline TIM_t* TimerIdToStruct(int timer_id) {
   static TIM_t* const id_to_struct_lookup[] = {
-    TIM1,
-    TIM2,
-    TIM3,
-    TIM4,
-    TIM5,
-    TIM6,
-    TIM7,
+      TIM1, TIM2, TIM3, TIM4, TIM5, TIM6, TIM7,
   };
   return id_to_struct_lookup[timer_id];
 }
@@ -77,20 +71,11 @@ static inline void TimerInit(int timer_id) {
   // We need different flags to turn on the different timers, so look them up
   // from a table and apply them to the correct register.
   static const uint32_t id_to_flag_lookup[] = {
-    RCC_APB2ENR_TIM1EN,
-    RCC_APB1ENR_TIM2EN,
-    RCC_APB1ENR_TIM3EN,
-    RCC_APB1ENR_TIM4EN,
-    RCC_APB1ENR_TIM5EN,
-    RCC_APB1ENR_TIM6EN,
-    RCC_APB1ENR_TIM7EN,
-    RCC_APB2ENR_TIM8EN,
-    RCC_APB2ENR_TIM9EN,
-    RCC_APB2ENR_TIM10EN,
-    RCC_APB2ENR_TIM11EN,
-    RCC_APB1ENR_TIM12EN,
-    RCC_APB1ENR_TIM13EN,
-    RCC_APB1ENR_TIM14EN,
+      RCC_APB2ENR_TIM1EN,  RCC_APB1ENR_TIM2EN,  RCC_APB1ENR_TIM3EN,
+      RCC_APB1ENR_TIM4EN,  RCC_APB1ENR_TIM5EN,  RCC_APB1ENR_TIM6EN,
+      RCC_APB1ENR_TIM7EN,  RCC_APB2ENR_TIM8EN,  RCC_APB2ENR_TIM9EN,
+      RCC_APB2ENR_TIM10EN, RCC_APB2ENR_TIM11EN, RCC_APB1ENR_TIM12EN,
+      RCC_APB1ENR_TIM13EN, RCC_APB1ENR_TIM14EN,
   };
   const uint32_t flag = id_to_flag_lookup[timer_id];
   if ((timer_id == TIMERID_TIM1) || (timer_id > TIMERID_TIM7)) {
@@ -107,10 +92,7 @@ static inline void TimerInit(int timer_id) {
   // Prescaled is 72,000 /4.
   tim->PSC = 18000;
   tim->ARR = 0xffff;
-  tim->CR1 =
-    TIM_CR1_DIR_UP |
-    TIM_CR1_CMS_EDGE |
-    TIM_CR1_CKD_DIV4;
+  tim->CR1 = TIM_CR1_DIR_UP | TIM_CR1_CMS_EDGE | TIM_CR1_CKD_DIV4;
   // Once everything's set up, turn the timer on.
   tim->CR1 |= TIM_CR1_CEN;
 }

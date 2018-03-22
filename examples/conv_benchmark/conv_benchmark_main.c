@@ -22,13 +22,15 @@ enum Padding {
   SAME = 2,   // Input and output layers have the same size.
 };
 
-void ReferenceConv(const uint8_t* input_data,
-		  int input_batches, int input_height, int input_width,
-		  int input_depth, int input_offset, const uint8_t* filter_data,
-		  int filter_height, int filter_width, int filter_count,
-		  int filter_offset, int stride, enum Padding padding,
-		  uint8_t* output_data, int output_height, int output_width,
-		  int output_shift, int output_offset, int output_mult) {
+int g_max_index = 0;
+
+void ReferenceConv(const uint8_t* input_data, int input_batches,
+                   int input_height, int input_width, int input_depth,
+                   int input_offset, const uint8_t* filter_data,
+                   int filter_height, int filter_width, int filter_count,
+                   int filter_offset, int stride, enum Padding padding,
+                   uint8_t* output_data, int output_height, int output_width,
+                   int output_shift, int output_offset, int output_mult) {
   // Set up some constants we need for the output down-shifting and
   // saturation.
   const int32_t highest = (1 << 8) - 1;
@@ -59,14 +61,14 @@ void ReferenceConv(const uint8_t* input_data,
   int filter_top_offset;
   if (padding == VALID) {
     filter_left_offset =
-      ((output_width - 1) * stride + filter_width - input_width + 1) / 2;
+        ((output_width - 1) * stride + filter_width - input_width + 1) / 2;
     filter_top_offset =
-      ((output_height - 1) * stride + filter_height - input_height + 1) / 2;
+        ((output_height - 1) * stride + filter_height - input_height + 1) / 2;
   } else {
     filter_left_offset =
-      ((output_width - 1) * stride + filter_width - input_width) / 2;
+        ((output_width - 1) * stride + filter_width - input_width) / 2;
     filter_top_offset =
-      ((output_height - 1) * stride + filter_height - input_height) / 2;
+        ((output_height - 1) * stride + filter_height - input_height) / 2;
   }
 
   // If we've got multiple images in our input, work through each of them.
@@ -76,13 +78,13 @@ void ReferenceConv(const uint8_t* input_data,
     // positions in the input.
     for (int out_y = 0; out_y < output_height; ++out_y) {
       for (int out_x = 0; out_x < output_width; ++out_x) {
-	// Each filter kernel produces one output channel.
-	for (int out_channel = 0; out_channel < filter_count; ++out_channel) {
-	  // We're going to calculate a single output value, which means we
-	  // need to multiply a three dimensional kernel of weights against
-	  // the current location within the input image.
-	  /*
-	   *-------------------------------...
+        // Each filter kernel produces one output channel.
+        for (int out_channel = 0; out_channel < filter_count; ++out_channel) {
+          // We're going to calculate a single output value, which means we
+          // need to multiply a three dimensional kernel of weights against
+          // the current location within the input image.
+          /*
+           *-------------------------------...
               |\ ^
               | \in_depth
               |  \ v
@@ -96,56 +98,61 @@ void ReferenceConv(const uint8_t* input_data,
               .   |             <--->
                   .         filter_width
                   .
-	  */
-	  const int in_x_origin = (out_x * stride) - filter_left_offset;
-	  const int in_y_origin = (out_y * stride) - filter_top_offset;
-	  int32_t total = 0;
-	  for (int filter_y = 0; filter_y < filter_height; ++filter_y) {
-	    for (int filter_x = 0; filter_x < filter_width; ++filter_x) {
-	      for (int in_channel = 0; in_channel < input_depth;
-		   ++in_channel) {
-		const int in_x = in_x_origin + filter_x;
-		const int in_y = in_y_origin + filter_y;
-		int32_t input_value;
-		// If the location is outside the bounds of the input image,
-		// use zero as a default value.
-		if ((in_x >= 0) && (in_x < input_width) && (in_y >= 0) &&
-		    (in_y < input_height)) {
-		  const uint8_t input_source_value =
-		    input_data[(batch * input_height * input_width *
-				input_depth) +
-			       (in_y * input_width * input_depth) +
-			       (in_x * input_depth) + in_channel];
-		  // We're promoting the T1 type to a higher bit depth here as
-		  // we do the subtraction.
-		  input_value =
-		    (int32_t)(input_source_value) - input_offset;
-		} else {
-		  input_value = 0;
-		}
-		const uint8_t filter_source_value =
-		  filter_data[(filter_y * filter_width * input_depth *
-			       filter_count) +
-			      (filter_x * input_depth * filter_count) +
-			      (in_channel * filter_count) + out_channel];
-		// Another promotion to 32 bit, as above.
-		const int32_t filter_value =
-		  (int32_t)(filter_source_value) - filter_offset;
-		total += (input_value * filter_value);
-	      }
-	    }
-	  }
-	  // Here we're applying scale factors to compress the 32 bit
-	  // accumulated total to a potentially lower bit depth.
-	  const int32_t output =
-	    ((((total + output_offset) * output_mult) + rounding) >>
-	     output_shift);
-	  const int32_t top_clamped_output = (output > highest) ? highest : output;
-	  const int32_t clamped_output = (top_clamped_output < lowest) ? lowest : top_clamped_output;
-	  output_data[(batch * output_height * output_width * filter_count) +
-		      (out_y * output_width * filter_count) +
-		      (out_x * filter_count) + out_channel] = clamped_output;
-	}
+          */
+          const int in_x_origin = (out_x * stride) - filter_left_offset;
+          const int in_y_origin = (out_y * stride) - filter_top_offset;
+          int32_t total = 0;
+          for (int filter_y = 0; filter_y < filter_height; ++filter_y) {
+            for (int filter_x = 0; filter_x < filter_width; ++filter_x) {
+              for (int in_channel = 0; in_channel < input_depth; ++in_channel) {
+                const int in_x = in_x_origin + filter_x;
+                const int in_y = in_y_origin + filter_y;
+                int32_t input_value;
+                // If the location is outside the bounds of the input image,
+                // use zero as a default value.
+                if ((in_x >= 0) && (in_x < input_width) && (in_y >= 0) &&
+                    (in_y < input_height)) {
+                  const uint8_t input_source_value =
+                      input_data[(batch * input_height * input_width *
+                                  input_depth) +
+                                 (in_y * input_width * input_depth) +
+                                 (in_x * input_depth) + in_channel];
+                  // We're promoting the T1 type to a higher bit depth here as
+                  // we do the subtraction.
+                  input_value = (int32_t)(input_source_value)-input_offset;
+                } else {
+                  input_value = 0;
+                }
+                const int filter_index =
+                    (filter_y * filter_width * input_depth * filter_count) +
+                    (filter_x * input_depth * filter_count) +
+                    (in_channel * filter_count) + out_channel;
+                const uint8_t filter_source_value = filter_data[filter_index];
+                // Another promotion to 32 bit, as above.
+                const int32_t filter_value =
+                    (int32_t)(filter_source_value)-filter_offset;
+                total += (input_value * filter_value);
+              }
+            }
+          }
+          // Here we're applying scale factors to compress the 32 bit
+          // accumulated total to a potentially lower bit depth.
+          const int32_t output =
+              ((((total + output_offset) * output_mult) + rounding) >>
+               output_shift);
+          const int32_t top_clamped_output =
+              (output > highest) ? highest : output;
+          const int32_t clamped_output =
+              (top_clamped_output < lowest) ? lowest : top_clamped_output;
+          const int output_index =
+              (batch * output_height * output_width * filter_count) +
+              (out_y * output_width * filter_count) + (out_x * filter_count) +
+              out_channel;
+          if (output_index > g_max_index) {
+            g_max_index = output_index;
+          }
+          output_data[output_index] = clamped_output;
+        }
       }
     }
   }
@@ -163,7 +170,7 @@ static inline void BenchmarkSmallReferenceConv() {
   // |  9 | 10 | 11 | 12 |
   const int32_t image_offset = 0;
   const uint8_t image_data[] = {
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
+      1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
   };
 
   // The filter matrix is:
@@ -175,7 +182,7 @@ static inline void BenchmarkSmallReferenceConv() {
   const int32_t filter_offset = 0;
   const int stride = 1;
   const uint8_t filter_data[] = {
-    1, 4, 7, 2, 5, 8, 3, 6, 9,
+      1, 4, 7, 2, 5, 8, 3, 6, 9,
   };
 
   // We're sliding the 3x3 filter across the 3x4 image, with accesses outside
@@ -199,8 +206,9 @@ static inline void BenchmarkSmallReferenceConv() {
   // |  187  |  234  |  261  |  121  |
   const int expected_width = image_width;
   const int expected_height = image_height * filter_count;
-  const uint8_t expected_data[] =
-    {105, 150, 183, 95, 235, 255 /*312*/, 255 /*357*/, 178, 187, 234, 255 /*261*/, 121};
+  const uint8_t expected_data[] = {105, 150,         183,         95,
+                                   235, 255 /*312*/, 255 /*357*/, 178,
+                                   187, 234,         255 /*261*/, 121};
 
   const int expected_elements = expected_height * expected_width;
   const int output_shift = 0;
@@ -210,19 +218,17 @@ static inline void BenchmarkSmallReferenceConv() {
   const int repetitions = 1000;
   volatile uint16_t start_time = TimerGetCounter(TIMERID_TIM1);
   for (int i = 0; i < repetitions; ++i) {
-    ReferenceConv(image_data,
-		  image_batch_count, image_height, image_width,
-		  image_depth, image_offset, filter_data,
-		  filter_size, filter_size, filter_count,
-		  filter_offset, stride, SAME,
-		  output_data, expected_height, expected_width,
-		  output_shift, output_offset, output_mult);
+    ReferenceConv(image_data, image_batch_count, image_height, image_width,
+                  image_depth, image_offset, filter_data, filter_size,
+                  filter_size, filter_count, filter_offset, stride, SAME,
+                  output_data, expected_height, expected_width, output_shift,
+                  output_offset, output_mult);
   }
   volatile uint16_t duration = TimerGetCounter(TIMERID_TIM1) - start_time;
   const int32_t microseconds_per_conv = (duration * 1000) / repetitions;
   const int32_t op_count =
-	    expected_elements * image_depth * filter_size * filter_size * 2;
-  const int32_t ops_per_second = (op_count * 1000000) / microseconds_per_conv; 
+      expected_elements * image_depth * filter_size * filter_size * 2;
+  const int32_t ops_per_second = (op_count * 1000000) / microseconds_per_conv;
   char adc_log[ADC_LOG_LENGTH];
   StrCpy(adc_log, ADC_LOG_LENGTH, "Small ReferenceConv took: ");
   StrCatInt32(adc_log, ADC_LOG_LENGTH, microseconds_per_conv);
@@ -249,7 +255,177 @@ static inline void BenchmarkSmallReferenceConv() {
   }
 }
 
-char adc_log[ADC_LOG_LENGTH];
+static inline void BenchmarkSmallInt8ReferenceConv() {
+  const int image_depth = 1;
+  const int image_width = 4;
+  const int image_height = 3;
+  const int image_batch_count = 1;
+
+  // The image matrix is:
+  // |  1 |  2 |  3 |  4 |
+  // |  5 |  6 |  7 |  8 |
+  // |  9 | 10 | 11 | 12 |
+  const int32_t image_offset = 128;
+  const uint8_t image_data[] = {
+      1 + 128, 2 + 128, 3 + 128, 4 + 128,  5 + 128,  6 + 128,
+      7 + 128, 8 + 128, 9 + 128, 10 + 128, 11 + 128, 12 + 128,
+  };
+
+  // The filter matrix is:
+  // |  1 | -4 |  7 |
+  // | -2 |  5 | -8 |
+  // |  3 | -6 |  9 |
+  const int filter_size = 3;
+  const int filter_count = 1;
+  const int32_t filter_offset = 128;
+  const int stride = 1;
+  const uint8_t filter_data[] = {
+      1 + 128,  -4 + 128, 7 + 128,  -2 + 128, 5 + 128,
+      -8 + 128, 3 + 128,  -6 + 128, 9 + 128,
+  };
+
+  // We're sliding the 3x3 filter across the 3x4 image, with accesses outside
+  // the input set to zero because we're using the 'SAME' padding mode.
+  // The calculations behind the expected output are:
+  // (1*0)+(-4*0)+(7*0)+(-2*0)+(5*1)+(-8*2)+(3*0)+(-6*5)+(9*6)=13
+  // (1*0)+(-4*0)+(7*0)+(-2*1)+(5*2)+(-8*3)+(3*5)+(-6*6)+(9*7)=26
+  // (1*0)+(-4*0)+(7*0)+(-2*2)+(5*3)+(-8*4)+(3*6)+(-6*7)+(9*8)=27
+  // (1*0)+(-4*0)+(7*0)+(-2*3)+(5*4)+(-8*0)+(3*7)+(-6*8)+(9*0)=-13
+  // (1*0)+(-4*1)+(7*2)+(-2*0)+(5*5)+(-8*6)+(3*0)+(-6*9)+(9*10)=23
+  // (1*1)+(-4*2)+(7*3)+(-2*5)+(5*6)+(-8*7)+(3*9)+(-6*10)+(9*11)=44
+  // (1*2)+(-4*3)+(7*4)+(-2*6)+(5*7)+(-8*8)+(3*10)+(-6*11)+(9*12)=49
+  // (1*3)+(-4*4)+(7*0)+(-2*7)+(5*8)+(-8*0)+(3*11)+(-6*12)+(9*0)=-26
+  // (1*0)+(-4*5)+(7*6)+(-2*0)+(5*9)+(-8*10)+(3*0)+(-6*0)+(9*0)=-13
+  // (1*5)+(-4*6)+(7*7)+(-2*9)+(5*10)+(-8*11)+(3*0)+(-6*0)+(9*0)=-26
+  // (1*6)+(-4*7)+(7*8)+(-2*10)+(5*11)+(-8*12)+(3*0)+(-6*0)+(9*0)=-27
+  // (1*7)+(-4*8)+(7*0)+(-2*11)+(5*12)+(-8*0)+(3*0)+(-6*0)+(9*0)=13
+  // This means we should end up with this matrix:
+  // |  13 |  26 |  27 | -13 |
+  // |  23 |  44 |  49 | -26 |
+  // |  13 | -26 | -27 |   7  |
+  const int expected_width = image_width;
+  const int expected_height = image_height * filter_count;
+  const uint8_t expected_data[] = {13 + 128,  26 + 128,  27 + 128,  -13 + 128,
+                                   23 + 128,  44 + 128,  49 + 128,  -26 + 128,
+                                   -13 + 128, -26 + 128, -27 + 128, 13 + 128};
+
+  const int expected_elements = expected_height * expected_width;
+  const int output_shift = 0;
+  const int output_offset = 128;
+  const int output_mult = 1;
+  uint8_t output_data[expected_elements];
+  const int repetitions = 1000;
+  volatile uint16_t start_time = TimerGetCounter(TIMERID_TIM1);
+  for (int i = 0; i < repetitions; ++i) {
+    ReferenceConv(image_data, image_batch_count, image_height, image_width,
+                  image_depth, image_offset, filter_data, filter_size,
+                  filter_size, filter_count, filter_offset, stride, SAME,
+                  output_data, expected_height, expected_width, output_shift,
+                  output_offset, output_mult);
+  }
+  volatile uint16_t duration = TimerGetCounter(TIMERID_TIM1) - start_time;
+  const int32_t microseconds_per_conv = (duration * 1000) / repetitions;
+  const int32_t op_count =
+      expected_elements * image_depth * filter_size * filter_size * 2;
+  const int32_t ops_per_second = (op_count * 1000000) / microseconds_per_conv;
+  char adc_log[ADC_LOG_LENGTH];
+  StrCpy(adc_log, ADC_LOG_LENGTH, "Small ReferenceConv took: ");
+  StrCatInt32(adc_log, ADC_LOG_LENGTH, microseconds_per_conv);
+  StrCatStr(adc_log, ADC_LOG_LENGTH, "us (");
+  StrCatInt32(adc_log, ADC_LOG_LENGTH, op_count);
+  StrCatStr(adc_log, ADC_LOG_LENGTH, " ops, ");
+  StrCatInt32(adc_log, ADC_LOG_LENGTH, ops_per_second);
+  StrCatStr(adc_log, ADC_LOG_LENGTH, " ops/s)\n ");
+  DebugLog(adc_log);
+
+  int did_all_match = 1;
+  for (int i = 0; i < expected_elements; ++i) {
+    if (expected_data[i] != output_data[i]) {
+      char adc_log[ADC_LOG_LENGTH];
+      StrCpy(adc_log, ADC_LOG_LENGTH, "Error: output_data[");
+      StrCatInt32(adc_log, ADC_LOG_LENGTH, i);
+      StrCatStr(adc_log, ADC_LOG_LENGTH, "](");
+      StrCatInt32(adc_log, ADC_LOG_LENGTH, output_data[i]);
+      StrCatStr(adc_log, ADC_LOG_LENGTH, ") != ");
+      StrCatInt32(adc_log, ADC_LOG_LENGTH, expected_data[i]);
+      StrCatStr(adc_log, ADC_LOG_LENGTH, "\r\n");
+      DebugLog(adc_log);
+    }
+  }
+}
+
+static void BenchmarkReferenceConv(int image_batch_count, int image_height,
+                                   int image_width, int image_depth,
+                                   int filter_height, int filter_width,
+                                   int filter_count) {
+  const int32_t image_offset = 128;
+  const int image_elements =
+      image_batch_count * image_height * image_width * image_depth;
+  uint8_t image_data[image_elements];
+  for (int i = 0; i < image_elements; ++i) {
+    image_data[i] = (i % 256);
+  }
+
+  const int32_t filter_offset = 128;
+  const int stride = 1;
+  const int filter_elements =
+      filter_count * filter_height * filter_width * image_depth;
+  //  LOG_INT32(filter_elements);
+  uint8_t filter_data[filter_elements];
+  for (int i = 0; i < filter_elements; ++i) {
+    filter_data[i] = (i % 256);
+  }
+
+  const int expected_width = image_width;
+  const int expected_height = image_height;
+  const int expected_elements =
+      image_batch_count * expected_height * expected_width * filter_count;
+  const int output_shift = 0;
+  const int output_offset = 128;
+  const int output_mult = 1;
+  uint8_t output_data[expected_elements];
+  const int repetitions = 10;
+  volatile uint16_t start_time = TimerGetCounter(TIMERID_TIM1);
+  for (int i = 0; i < repetitions; ++i) {
+    ReferenceConv(image_data, image_batch_count, image_height, image_width,
+                  image_depth, image_offset, filter_data, filter_height,
+                  filter_width, filter_count, filter_offset, stride, SAME,
+                  output_data, expected_height, expected_width, output_shift,
+                  output_offset, output_mult);
+  }
+  volatile uint16_t duration = TimerGetCounter(TIMERID_TIM1) - start_time;
+  const int32_t microseconds_per_conv = (duration * 1000) / repetitions;
+  const int32_t op_count =
+      expected_elements * image_depth * filter_height * filter_width * 2;
+  const int32_t ops_per_second =
+      ((op_count * 1000) / microseconds_per_conv) * 1000;
+
+  char adc_log[ADC_LOG_LENGTH];
+  StrCpy(adc_log, ADC_LOG_LENGTH, "ReferenceConv(");
+  StrCatInt32(adc_log, ADC_LOG_LENGTH, image_batch_count);
+  StrCatStr(adc_log, ADC_LOG_LENGTH, ", ");
+  StrCatInt32(adc_log, ADC_LOG_LENGTH, image_height);
+  StrCatStr(adc_log, ADC_LOG_LENGTH, ", ");
+  StrCatInt32(adc_log, ADC_LOG_LENGTH, image_width);
+  StrCatStr(adc_log, ADC_LOG_LENGTH, ", ");
+  StrCatInt32(adc_log, ADC_LOG_LENGTH, image_depth);
+  StrCatStr(adc_log, ADC_LOG_LENGTH, ", ");
+  StrCatInt32(adc_log, ADC_LOG_LENGTH, filter_height);
+  StrCatStr(adc_log, ADC_LOG_LENGTH, ", ");
+  StrCatInt32(adc_log, ADC_LOG_LENGTH, filter_width);
+  StrCatStr(adc_log, ADC_LOG_LENGTH, ", ");
+  StrCatInt32(adc_log, ADC_LOG_LENGTH, filter_count);
+  StrCatStr(adc_log, ADC_LOG_LENGTH, ") took ");
+  StrCatInt32(adc_log, ADC_LOG_LENGTH, microseconds_per_conv);
+  StrCatStr(adc_log, ADC_LOG_LENGTH, "us (");
+  StrCatInt32(adc_log, ADC_LOG_LENGTH, op_count);
+  StrCatStr(adc_log, ADC_LOG_LENGTH, " ops, ");
+  StrCatInt32(adc_log, ADC_LOG_LENGTH, ops_per_second);
+  StrCatStr(adc_log, ADC_LOG_LENGTH, " ops/s)\n");
+  DebugLog(adc_log);
+
+  DebugLog("Done\n");
+}
 
 void main(void) {
   // Start up the clock system.
@@ -258,4 +434,8 @@ void main(void) {
   TimerInit(TIMERID_TIM1);
 
   BenchmarkSmallReferenceConv();
+  BenchmarkSmallInt8ReferenceConv();
+  BenchmarkReferenceConv(1, 5, 5, 2, 3, 3, 4);
+  BenchmarkReferenceConv(1, 10, 10, 2, 3, 3, 4);
+  BenchmarkReferenceConv(1, 10, 10, 10, 3, 3, 4);
 }

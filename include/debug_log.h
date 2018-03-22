@@ -23,8 +23,8 @@ limitations under the License.
 
 // Writes a string to the OpenOCD debug console. This can take hundreds of
 // milliseconds, so don't call this in performance-intensive code.
-static inline void DebugLog(char* s) {
-  asm("mov r0, #0x04\n" // SYS_WRITE0
+static void DebugLog(char* s) {
+  asm("mov r0, #0x04\n"  // SYS_WRITE0
       "mov r1, %[str]\n"
       "bkpt #0xAB\n"
       :
@@ -33,7 +33,7 @@ static inline void DebugLog(char* s) {
 }
 
 // Writes out a signed 32-bit number to the debug console.
-static inline void DebugLogInt32(int32_t i) {
+static void DebugLogInt32(int32_t i) {
   char number_string[kFastToBufferSize];
   FastInt32ToBufferLeft(i, number_string);
   DebugLog(number_string);
@@ -47,21 +47,33 @@ static inline void DebugLogUInt32(uint32_t i) {
 }
 
 // Writes out an unsigned 32-bit number to the debug console as hex.
-static inline void DebugLogHex(uint32_t i) {
+static void DebugLogHex(uint32_t i) {
   char number_string[kFastToBufferSize];
   FastUInt32ToBufferLeft(i, number_string, 16);
   DebugLog(number_string);
 }
 
 // An easy way of logging labeled numerical variables for debugging.
-#define LOG_INT32(x) do {                  \
-    const int log_length = 64;             \
-    char log[log_length];                  \
-    StrCpy(log, log_length, #x);           \
-    StrCatStr(log, log_length, "=");       \
-    StrCatInt32(log, log_length, x);       \
-    StrCatStr(log, log_length, "\n");      \
-    DebugLog(log);                         \
+#define LOG_INT32(x)                  \
+  do {                                \
+    const int log_length = 64;        \
+    char log[log_length];             \
+    StrCpy(log, log_length, #x);      \
+    StrCatStr(log, log_length, "=");  \
+    StrCatInt32(log, log_length, x);  \
+    StrCatStr(log, log_length, "\n"); \
+    DebugLog(log);                    \
+  } while (0)
+
+#define LOG_HEX32(x)                      \
+  do {                                    \
+    const int log_length = 64;            \
+    char log[log_length];                 \
+    StrCpy(log, log_length, #x);          \
+    StrCatStr(log, log_length, "=0x");    \
+    StrCatUInt32(log, log_length, x, 16); \
+    StrCatStr(log, log_length, "\n");     \
+    DebugLog(log);                        \
   } while (0)
 
 #endif  // INCLUDE_DEBUG_LOG_H

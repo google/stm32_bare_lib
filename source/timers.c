@@ -21,9 +21,9 @@ OnSysTickCallback g_tick_callback = 0;
 // The frequency can be controlled by SysTick_Config.
 void OnSysTick() {
   g_tick_count += 1;
-  //DebugLog("Foo\n");
+  // DebugLog("Foo\n");
   //*(char*)(0) = 23;
-  //if (g_tick_callback) {
+  // if (g_tick_callback) {
   //  g_tick_callback(g_tick_count);
   //}
 }

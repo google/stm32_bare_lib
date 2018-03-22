@@ -17,13 +17,11 @@ limitations under the License.
 
 #define ADC_LOG_LENGTH (256)
 
-static inline void ReferenceEightBitIntGemm(int transpose_a, int transpose_b,
-                              int transpose_c, int m, int n, int k,
-                              const uint8_t* a, int32_t a_offset,
-                              int lda, const uint8_t* b,
-                              int32_t b_offset, int ldb, uint8_t* c,
-                              int32_t c_offset, int32_t c_mult_int,
-                              int32_t c_shift, int ldc) {
+static inline void ReferenceEightBitIntGemm(
+    int transpose_a, int transpose_b, int transpose_c, int m, int n, int k,
+    const uint8_t* a, int32_t a_offset, int lda, const uint8_t* b,
+    int32_t b_offset, int ldb, uint8_t* c, int32_t c_offset, int32_t c_mult_int,
+    int32_t c_shift, int ldc) {
   int a_i_stride;
   int a_l_stride;
   if (transpose_a) {
@@ -61,12 +59,10 @@ static inline void ReferenceEightBitIntGemm(int transpose_a, int transpose_b,
       for (l = 0; l < k; l++) {
         const int a_index = i * a_i_stride + l * a_l_stride;
         const uint8_t a_as_byte = a[a_index];
-        const int32_t a_as_int =
-	  (int32_t)(a_as_byte) + a_offset;
+        const int32_t a_as_int = (int32_t)(a_as_byte) + a_offset;
         const int b_index = j * b_j_stride + l * b_l_stride;
         const uint8_t b_as_byte = b[b_index];
-        const int32_t b_as_int =
-	  (int32_t)(b_as_byte) + b_offset;
+        const int32_t b_as_int = (int32_t)(b_as_byte) + b_offset;
         const int32_t mult_as_int = a_as_int * b_as_int;
         total += mult_as_int;
       }
@@ -87,11 +83,11 @@ static inline void ReferenceEightBitIntGemm(int transpose_a, int transpose_b,
 static inline void BenchmarkSmallReferenceGemm() {
   // A matrix is:
   // |  1 |  2 |  3 |
-  // |  4 |  5 |  6 |  
+  // |  4 |  5 |  6 |
   const int a_rows = 2;
   const int a_cols = 3;
   const uint8_t a_data[] = {
-    1, 2, 3, 4, 5, 6,
+      1, 2, 3, 4, 5, 6,
   };
 
   // B matrix is:
@@ -101,7 +97,7 @@ static inline void BenchmarkSmallReferenceGemm() {
   const int b_rows = 3;
   const int b_cols = 4;
   const uint8_t b_data[] = {
-    7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
+      7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
   };
 
   // Here are the results we expect, from hand calculations:
@@ -116,22 +112,20 @@ static inline void BenchmarkSmallReferenceGemm() {
   const int c_rows = 2;
   const int c_cols = 4;
   const uint8_t expected_c_data[] = {
-    74, 80, 86, 92, 173, 188, 203, 218,
+      74, 80, 86, 92, 173, 188, 203, 218,
   };
 
   const int repetitions = 1000;
   uint8_t c_data[8];
   volatile uint16_t start_time = TimerGetCounter(TIMERID_TIM1);
   for (int i = 0; i < repetitions; ++i) {
-    ReferenceEightBitIntGemm(0, 0, 0, a_rows, b_cols, a_cols,
-    			     a_data, 0, a_cols,
-    			     b_data, 0, b_cols,
-    			     c_data, 0, 1, 0, c_cols);
+    ReferenceEightBitIntGemm(0, 0, 0, a_rows, b_cols, a_cols, a_data, 0, a_cols,
+                             b_data, 0, b_cols, c_data, 0, 1, 0, c_cols);
   }
   volatile uint16_t duration = TimerGetCounter(TIMERID_TIM1) - start_time;
   const int32_t microseconds_per_gemm = (duration * 1000) / repetitions;
   const int32_t op_count = a_rows * b_cols * a_cols * 2;
-  const int32_t ops_per_second = (op_count * 1000000) / microseconds_per_gemm; 
+  const int32_t ops_per_second = (op_count * 1000000) / microseconds_per_gemm;
   char adc_log[ADC_LOG_LENGTH];
   StrCpy(adc_log, ADC_LOG_LENGTH, "Small ReferenceGemm took: ");
   StrCatInt32(adc_log, ADC_LOG_LENGTH, microseconds_per_gemm);
@@ -154,7 +148,7 @@ static inline void BenchmarkSmallReferenceGemm() {
       StrCatInt32(adc_log, ADC_LOG_LENGTH, expected_c_data[i]);
       StrCatStr(adc_log, ADC_LOG_LENGTH, "\r\n");
       DebugLog(adc_log);
-    }	
+    }
   }
 }
 
@@ -168,7 +162,7 @@ static inline void BenchmarkReferenceGemm(int m, int n, int k) {
   for (int i = 0; i < a_elements; ++i) {
     a_data[i] = (i % 256);
   }
-  
+
   const int b_rows = k;
   const int b_cols = n;
   const int b_elements = b_rows * b_cols;
@@ -184,15 +178,14 @@ static inline void BenchmarkReferenceGemm(int m, int n, int k) {
   const int repetitions = 1000;
   const uint16_t start_time = TimerGetCounter(TIMERID_TIM1);
   for (int i = 0; i < repetitions; ++i) {
-    ReferenceEightBitIntGemm(0, 0, 0, a_rows, b_cols, a_cols,
-    			     a_data, 0, a_cols,
-    			     b_data, 0, b_cols,
-    			     c_data, 0, 1, 0, c_cols);
+    ReferenceEightBitIntGemm(0, 0, 0, a_rows, b_cols, a_cols, a_data, 0, a_cols,
+                             b_data, 0, b_cols, c_data, 0, 1, 0, c_cols);
   }
   const uint16_t duration = TimerGetCounter(TIMERID_TIM1) - start_time;
   const int32_t microseconds_per_gemm = (duration * 1000) / repetitions;
   const int32_t op_count = a_rows * b_cols * a_cols * 2;
-  const int32_t ops_per_second = ((op_count * 1000) / microseconds_per_gemm) * 1000; 
+  const int32_t ops_per_second =
+      ((op_count * 1000) / microseconds_per_gemm) * 1000;
   StrCpy(adc_log, ADC_LOG_LENGTH, "ReferenceGemm(");
   StrCatInt32(adc_log, ADC_LOG_LENGTH, m);
   StrCatStr(adc_log, ADC_LOG_LENGTH, ", ");
@@ -220,7 +213,7 @@ void main(void) {
   BenchmarkReferenceGemm(5, 5, 5);
   BenchmarkReferenceGemm(10, 10, 10);
   BenchmarkReferenceGemm(15, 15, 15);
-  
+
   BenchmarkReferenceGemm(25, 25, 5);
   BenchmarkReferenceGemm(5, 25, 25);
   BenchmarkReferenceGemm(25, 5, 25);

@@ -22,7 +22,7 @@ void main(void) {
   // Set up SysTick to call back every millisecond.
   g_tick_count = 0;
   SysTick_Config(CLOCK_RATE / 10000);
-  DebugLog("Benchmarking started\n"); 
+  DebugLog("Benchmarking started\n");
 
   volatile int32_t a = 42;
   volatile int32_t b = 23;

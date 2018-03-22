@@ -18,89 +18,28 @@ limitations under the License.
 #include <stdint.h>
 
 // Reverses a zero-terminated string in-place.
-static inline char* ReverseStringInPlace(char* start, char* end) {
-  char *p1 = start;
-  char *p2 = end - 1;
-  while (p1 < p2) {
-    char tmp = *p1;
-    *p1++ = *p2;
-    *p2-- = tmp;
-  }
-  return start;
-}
+char* ReverseStringInPlace(char* start, char* end);
 
 // Populates the provided buffer with an ASCII representation of the number.
-static inline char* FastUInt32ToBufferLeft(uint32_t i, char* buffer, int base) {
-  char* start = buffer;
-  do {
-    int32_t digit = i % base;
-    char character;
-    if (digit < 10) {
-      character = '0' + digit;
-    } else {
-      character = 'a' + (digit - 10);
-    }
-    *buffer++ = character;
-    i /= base;
-  } while (i > 0);
-  *buffer = 0;
-  ReverseStringInPlace(start, buffer);
-  return buffer;
-}
+char* FastUInt32ToBufferLeft(uint32_t i, char* buffer, int base);
 
 // All input buffers to the number conversion functions must be this long.
 static const int kFastToBufferSize = 48;
 
 // Populates the provided buffer with an ASCII representation of the number.
-static inline char* FastInt32ToBufferLeft(int32_t i, char* buffer) {
-  uint32_t u = i;
-  if (i < 0) {
-    *buffer++ = '-';
-    u = -u;
-  }
-  return FastUInt32ToBufferLeft(u, buffer, 10);
-}
+char* FastInt32ToBufferLeft(int32_t i, char* buffer);
 
-// Appends a string to a string, in-place. You need to pass in the maximum string
+// Appends a string to a string, in-place. You need to pass in the maximum
+// string
 // length as the second argument.
-static inline char* StrCatStr(char* main, int main_max_length, char* to_append) {
-  char* current = main;
-  while (*current != 0) {
-    ++current;
-  }
-  const int current_length = current - main;
-  char* current_end = current + (main_max_length - 1);
-  while ((*to_append != 0) && (current < current_end)) {
-    *current = *to_append;
-    ++current;
-    ++to_append;
-  }
-  *current = 0;
-}
+char* StrCatStr(char* main, int main_max_length, char* to_append);
 
 // Converts a number to a string and appends it to another.
-static inline char* StrCatInt32(char* main, int main_max_length, int32_t number) {
-  char number_string[kFastToBufferSize];
-  FastInt32ToBufferLeft(number, number_string);
-  StrCatStr(main, main_max_length, number_string);
-}
+void StrCatInt32(char* main, int main_max_length, int32_t number);
 
 // Converts a number to a string and appends it to another.
-static inline char* StrCatUInt32(char* main, int main_max_length, uint32_t number, int base) {
-  char number_string[kFastToBufferSize];
-  FastUInt32ToBufferLeft(number, number_string, base);
-  StrCatStr(main, main_max_length, number_string);
-}
+void StrCatUInt32(char* main, int main_max_length, uint32_t number, int base);
 
-static inline void StrCpy(char* main, int main_max_length, const char* source) {
-  char* current = main;
-  char* current_end = main + (main_max_length - 1);
-  while ((*source != 0) && (current < current_end)) {
-    *current = *source;
-    ++current;
-    ++source;
-  }
-  *current = 0;  
-}
+void StrCpy(char* main, int main_max_length, const char* source);
 
 #endif  // INCLUDE_STRINGS_H

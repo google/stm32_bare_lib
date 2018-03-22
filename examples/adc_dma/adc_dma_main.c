@@ -29,7 +29,7 @@ void main(void) {
   g_half_count = 0;
   g_complete_count = 0;
   g_current_volume = 0;
-  
+
   // Start up the clock system.
   RccInitForAdc();
 
@@ -37,7 +37,7 @@ void main(void) {
   AdcInit(GPIOA, 0, 0);
   DmaInit();
   AdcDmaOn(g_dma_buffer, DMA_BUFFER_SIZE);
-  //AdcOn();
+  // AdcOn();
   while (1) {
     const int32_t adc_log_length = 256;
     char adc_log[adc_log_length];
@@ -71,7 +71,7 @@ void ProcessDmaBuffer(const uint16_t* buffer, int start_index, int end_index) {
     const int32_t delta = (current_value - mean);
     int32_t abs_delta;
     if (delta < 0) {
-      abs_delta = - delta;
+      abs_delta = -delta;
     } else {
       abs_delta = delta;
     }

@@ -13,9 +13,9 @@ limitations under the License.
 // This example shows how to read an ADC using DMA. For a simpler but slower
 // version, see examples/adc_interrupt.
 
+#include "led.h"
 #include "adc.h"
 #include "debug_log.h"
-#include "led.h"
 
 #define DMA_BUFFER_SIZE (1024)
 uint16_t g_dma_buffer[DMA_BUFFER_SIZE];
@@ -30,7 +30,7 @@ void main(void) {
   g_half_count = 0;
   g_complete_count = 0;
   g_current_volume = 0;
-  
+
   // Start up the clock system.
   RccInitForAdc();
 
@@ -39,7 +39,7 @@ void main(void) {
   DmaInit();
   AdcDmaOn(g_dma_buffer, DMA_BUFFER_SIZE);
   LedInit();
-  //AdcOn();
+  // AdcOn();
   while (1) {
     if (g_current_volume > 10) {
       LedOn();
@@ -66,7 +66,7 @@ void ProcessDmaBuffer(const uint16_t* buffer, int start_index, int end_index) {
     const int32_t delta = (current_value - mean);
     int32_t abs_delta;
     if (delta < 0) {
-      abs_delta = - delta;
+      abs_delta = -delta;
     } else {
       abs_delta = delta;
     }

@@ -20,14 +20,15 @@ limitations under the License.
 #include "debug_log.h"
 
 // test static initialization
-static char foo_static[] = {'s','t','a','t','i','c','\n'};
+static char foo_static[] = {'s', 't', 'a', 't', 'i', 'c', '\n'};
 static long uninitialized_values[4];
 
 void main(void) {
   DebugLog("Starting static initialization test\n");
-  while(1) {
+  while (1) {
     // Busy wait and keep printing
-    for(long k = 0; k < 100000; k++);
+    for (long k = 0; k < 100000; k++)
+      ;
     DebugLog(foo_static);
     DebugLogHex(uninitialized_values[0]);
     DebugLog("\n");
