@@ -344,21 +344,55 @@ void FastSymmetricalConv(const int8_t* input_data, int input_batches,
 	    const int in_y = in_y_origin + filter_y;
 	    const int8_t* filter_row = filter_channel +
 	      (filter_y * filter_width * input_depth * filter_count);
-	    const int8_t* input_row = input_batch + (in_y * input_width * input_depth);
-            for (int filter_x = filter_start_x; filter_x < filter_end_x; ++filter_x) {
-	      const int in_x = in_x_origin + filter_x;
-	      const int8_t* filter_pixel = filter_row +
-		(filter_x * input_depth * filter_count);
-	      const int8_t* input_pixel = input_row + (in_x * input_depth);
-	      const int8_t* input_end = input_pixel + input_depth;
-              while (input_pixel < input_end) {
-                const int8_t input_value = *input_pixel;
-		input_pixel += 1;
-                const int8_t filter_value = *filter_pixel;
-		filter_pixel += filter_count;
-                total += (input_value * filter_value);
-              }
-            }
+	    asm volatile(
+			 "ldr r0, %[p_in_y]\n\t"
+			 "ldr r1, %[p_input_width]\n\t"
+			 "mul r6, r0, r1\n\t"
+			 "ldr r0, %[p_input_batch]\n\t"
+			 "mla r6, r6, %[input_depth], r0\n\t"
+			 "mov r5, %[filter_start_x]\n\t"
+			 "filter_x_loop%=:"
+			 "mul r4, r5, %[input_depth]\n\t"
+			 "mla r4, r4, %[filter_count], %[filter_row]\n\t"
+			 "add r2, %[in_x_origin], r5\n\t"
+			 "mla r2, r2, %[input_depth], r6\n\t"
+			 "add r3, r2, %[input_depth]\n\t"
+			 "input_pixel_loop%=:\n\t"
+			 "ldrsb r1, [r4]\n\t"
+			 "ldrsb r0, [r2], #1\n\t"
+			 "add r4, %[filter_count]\n\t"
+			 "mla %[total], r0, r1, %[total]\n\t"
+			 "cmp r2, r3\n\t"
+			 "blt input_pixel_loop%=\n\t"
+			 "add r5, #1\n\t"
+			 "cmp r5, %[filter_end_x]\n\t"
+			 "blt filter_x_loop%=\n\t"
+			 : [total] "+r" (total)
+			 : [filter_count] "r" (filter_count),
+			   [input_depth] "r" (input_depth),
+			   [filter_start_x] "r" (filter_start_x),
+			   [filter_end_x] "r" (filter_end_x),
+			   [filter_row] "r" (filter_row),
+			   [in_x_origin] "r" (in_x_origin),
+			   [p_in_y] "m" (in_y),
+			   [p_input_width] "m" (input_width),
+			   [p_input_batch] "m" (input_batch)
+			 : "r0", "r1", "r2", "r3", "r4", "r5", "r6", "memory");
+	    /* const int8_t* input_row = input_batch + (in_y * input_width * input_depth); */
+            /* for (int filter_x = filter_start_x; filter_x < filter_end_x; ++filter_x) { */
+	      /* const int in_x = in_x_origin + filter_x; */
+	      /* const int8_t* filter_pixel = filter_row + */
+	      /* 	(filter_x * input_depth * filter_count); */
+	      /* const int8_t* input_pixel = input_row + (in_x * input_depth); */
+	      /* const int8_t* input_end = input_pixel + input_depth; */
+              /* while (input_pixel < input_end) { */
+	      /* const int8_t input_value = *input_pixel; */
+	      /* input_pixel += 1; */
+	      /* const int8_t filter_value = *filter_pixel; */
+	      /* filter_pixel += filter_count; */
+	      /* total += (input_value * filter_value); */
+              /* } */
+            /* } */
           }
           // Here we're applying scale factors to compress the 32 bit
           // accumulated total to a potentially lower bit depth.
@@ -389,7 +423,7 @@ void FastSymmetricalOneChannelConv(const int8_t* input_data, int input_batches_f
 				   int output_shift, int output_offset, int output_mult) {
 
   const int input_batches = 1;
-  const int input_height = 50;
+  const int input_height = 25;/*50*/;
   const int input_width = 40;
   const int filter_height = 10;
   const int filter_width = 8;
@@ -621,6 +655,7 @@ static inline void BenchmarkSmallReferenceConv() {
     }
   }
 }
+
 static inline void BenchmarkSmallSymmetricalConv() {
   const int image_depth = 1;
   const int image_width = 4;
@@ -639,7 +674,8 @@ static inline void BenchmarkSmallSymmetricalConv() {
   // | 1 | 4 | 7 |
   // | 2 | 5 | 8 |
   // | 3 | 6 | 9 |
-  const int filter_size = 3;
+  const int filter_height = 3;
+  const int filter_width = 3;
   const int filter_count = 1;
   const int stride = 1;
   const int8_t filter_data[] = {
@@ -680,15 +716,15 @@ static inline void BenchmarkSmallSymmetricalConv() {
   volatile uint16_t start_time = TimerGetCounter(TIMERID_TIM1);
   for (int i = 0; i < repetitions; ++i) {
     FastSymmetricalConv(image_data, image_batch_count, image_height, image_width,
-			image_depth, filter_data, filter_size,
-			filter_size, filter_count, stride, SAME,
+			image_depth, filter_data, filter_height,
+			filter_width, filter_count, stride, SAME,
 			output_data, expected_height, expected_width, output_shift,
 			output_offset, output_mult);
   }
   volatile uint16_t duration = TimerGetCounter(TIMERID_TIM1) - start_time;
   const int32_t microseconds_per_conv = (duration * 1000) / repetitions;
   const int32_t op_count =
-      expected_elements * image_depth * filter_size * filter_size * 2;
+      expected_elements * image_depth * filter_height * filter_width * 2;
   const int32_t ops_per_second = (op_count * 1000000) / microseconds_per_conv;
   char adc_log[ADC_LOG_LENGTH];
   StrCpy(adc_log, ADC_LOG_LENGTH, "Small SymmetricalConv took: ");
@@ -802,11 +838,10 @@ static void BenchmarkSymmetricalConv(int image_batch_count, int image_height,
   const int stride = 1;
   const int filter_elements =
       filter_count * filter_height * filter_width * image_depth;
-  //int8_t filter_data[filter_elements];
-  //for (int i = 0; i < filter_elements; ++i) {
-  // filter_data[i] = (i % 256) - 128;
-  //}
-  int8_t* filter_data = (int8_t*)(0x08000000);
+  int8_t filter_data[filter_elements];
+  for (int i = 0; i < filter_elements; ++i) {
+    filter_data[i] = (i % 256) - 128;
+  }
   
   const int expected_width = image_width;
   const int expected_height = image_height;
@@ -818,13 +853,13 @@ static void BenchmarkSymmetricalConv(int image_batch_count, int image_height,
   uint8_t output_data[expected_elements];
   const int repetitions = 10;
   volatile uint16_t start_time = TimerGetCounter(TIMERID_TIM1);
-  if (image_depth == 1) {
+  if (image_depth == 1 && 0) {
     for (int i = 0; i < repetitions; ++i) {
-      FastSymmetricalOneChannelConv(image_data, image_batch_count, image_height, image_width,
-				    filter_data, filter_height,
+      FastSymmetricalOneChannelConv(image_data, image_batch_count, image_height,
+				    image_width, filter_data, filter_height,
 				    filter_width, filter_count, stride, SAME,
-				    output_data, expected_height, expected_width, output_shift,
-				    output_offset, output_mult);
+				    output_data, expected_height, expected_width,
+				    output_shift, output_offset, output_mult);
     }
   } else {
     for (int i = 0; i < repetitions; ++i) {
@@ -866,7 +901,27 @@ static void BenchmarkSymmetricalConv(int image_batch_count, int image_height,
   StrCatStr(adc_log, ADC_LOG_LENGTH, " ops/s)\n");
   DebugLog(adc_log);
 
-  DebugLog("Done\n");
+  uint8_t expected_data[expected_elements];
+  SymmetricalConv(image_data, image_batch_count, image_height,
+		  image_width, image_depth, filter_data, filter_height,
+		  filter_width, filter_count, stride, SAME,
+		  expected_data, expected_height, expected_width,
+		  output_shift, output_offset, output_mult);
+  
+  int did_all_match = 1;
+  for (int i = 0; i < expected_elements; ++i) {
+    if (expected_data[i] != output_data[i]) {
+      char adc_log[ADC_LOG_LENGTH];
+      StrCpy(adc_log, ADC_LOG_LENGTH, "Error: output_data[");
+      StrCatInt32(adc_log, ADC_LOG_LENGTH, i);
+      StrCatStr(adc_log, ADC_LOG_LENGTH, "](");
+      StrCatInt32(adc_log, ADC_LOG_LENGTH, output_data[i]);
+      StrCatStr(adc_log, ADC_LOG_LENGTH, ") != ");
+      StrCatInt32(adc_log, ADC_LOG_LENGTH, expected_data[i]);
+      StrCatStr(adc_log, ADC_LOG_LENGTH, "\r\n");
+      DebugLog(adc_log);
+    }
+  }
 }
 
 void main(void) {
@@ -875,6 +930,15 @@ void main(void) {
 
   TimerInit(TIMERID_TIM1);
 
+  int32_t total = 0;
+  int8_t input_value = 10;
+  int8_t filter_value = 10;
+  asm volatile("mla %[total], %[input_value], %[filter_value], %[total]\n\t"
+	       : [total]"+r" (total)
+	       : [input_value] "r" (input_value),
+		 [filter_value] "r" (filter_value));
+  LOG_INT32(total);
+  
   BenchmarkSmallReferenceConv();
   BenchmarkSmallSymmetricalConv();
   BenchmarkReferenceConv(1, 5, 5, 2, 3, 3, 4);
@@ -883,6 +947,6 @@ void main(void) {
   BenchmarkSymmetricalConv(1, 5, 5, 2, 3, 3, 4);
   BenchmarkSymmetricalConv(1, 10, 10, 2, 3, 3, 4);
   while (1) {
-    BenchmarkSymmetricalConv(1, 40, 50, 1, 10, 8, 8);
+    BenchmarkSymmetricalConv(1, 40, 25/*50*/, 1, 10, 8, 8);
   }
 }
