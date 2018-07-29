@@ -19,6 +19,10 @@ limitations under the License.
 
 #include "core_stm32.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif  // __cplusplus
+
 // We know the "Blue Pill" STM32 board runs at 72 MHz.
 #define CLOCK_RATE (72 * 1000 * 1000)
 
@@ -104,5 +108,9 @@ static inline uint16_t TimerGetCounter(int timer_id) {
   TIM_t* tim = TimerIdToStruct(timer_id);
   return tim->CNT;
 }
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif  // __cplusplus
 
 #endif  // INCLUDE_TIMERS_H

@@ -13,13 +13,16 @@ DEPDIR := $(GENDIR)/dep/
 CROSS_PREFIX := arm-none-eabi
 AS := $(CROSS_PREFIX)-as
 CC := $(CROSS_PREFIX)-gcc
+CPP := $(CROSS_PREFIX)-g++
 LD := $(CROSS_PREFIX)-gcc
 OBJCOPY := $(CROSS_PREFIX)-objcopy
 
 OPTFLAGS := -O3
 # Debug symbols are enabled with -g, but since we compile ELFs down to bin files, these don't
 # affect the code size on-device.
-CCFLAGS := -mcpu=cortex-m3 -mthumb -g -gdwarf-2 $(OPTFLAGS)
+BASE_COMPILER_FLAGS := -mcpu=cortex-m3 -mthumb -g -gdwarf-2 $(OPTFLAGS)
+CCFLAGS:= $(BASE_COMPILER_FLAGS)
+CPPFLAGS:= $(BASE_COMPILER_FLAGS)
 
 # Used to rebuild when headers used by a source file change.
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.Td
@@ -71,6 +74,12 @@ $(OBJDIR)%.o: %.c
 	@mkdir -p $(dir $@)
 	@mkdir -p $(dir $(DEPDIR)$*)
 	$(CC) $(CCFLAGS) $(INCLUDES) $(DEPFLAGS) -c $< -o $@
+	@mv -f $(DEPDIR)/$*.Td $(DEPDIR)/$*.d
+
+$(OBJDIR)%.o: %.cc
+	@mkdir -p $(dir $@)
+	@mkdir -p $(dir $(DEPDIR)$*)
+	$(CPP) $(CPPFLAGS) $(INCLUDES) $(DEPFLAGS) -c $< -o $@
 	@mv -f $(DEPDIR)/$*.Td $(DEPDIR)/$*.d
 
 $(OBJDIR)%.o: %.s

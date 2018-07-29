@@ -17,6 +17,10 @@ limitations under the License.
 
 #include "core_stm32.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif  // __cplusplus
+
 // Known location of the LED on the "Blue Pill" STM32 SoCs.
 #define LED_PORT (13)
 
@@ -35,5 +39,9 @@ static inline void LedInit() {
 // LedInit() must be called before these will work.
 static inline void LedOn() { GPIOC->BSRR = (1 << (LED_PORT + 16)); }
 static inline void LedOff() { GPIOC->BSRR = (1 << LED_PORT); }
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif  // __cplusplus
 
 #endif  // INCLUDE_LED_H

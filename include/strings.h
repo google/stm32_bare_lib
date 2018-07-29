@@ -17,6 +17,10 @@ limitations under the License.
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif  // __cplusplus
+
 // Reverses a zero-terminated string in-place.
 char* ReverseStringInPlace(char* start, char* end);
 
@@ -41,5 +45,9 @@ void StrCatInt32(char* main, int main_max_length, int32_t number);
 void StrCatUInt32(char* main, int main_max_length, uint32_t number, int base);
 
 void StrCpy(char* main, int main_max_length, const char* source);
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif  // __cplusplus
 
 #endif  // INCLUDE_STRINGS_H

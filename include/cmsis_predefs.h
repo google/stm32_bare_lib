@@ -16,6 +16,10 @@ limitations under the License.
 #ifndef INCLUDE_CMSIS_PREDEFS_H
 #define INCLUDE_CMSIS_PREDEFS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif  // __cplusplus
+
 // We need a couple of STM32-specific definitions before we include the main M3
 // header file.
 typedef enum IRQn {
@@ -51,5 +55,9 @@ typedef enum IRQn {
 // We want to use the standard ARM SysTick implementation, so indicate there's
 // no manufacturer-supplied version.
 #define __Vendor_SysTickConfig (0)
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif  // __cplusplus
 
 #endif  // INCLUDE_CMSIS_PREDEFS_H

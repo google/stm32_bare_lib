@@ -18,6 +18,10 @@ limitations under the License.
 #include "core_stm32.h"
 #include "timers.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif  // __cplusplus
+
 // Sets the mode bits for the GPIO port. See GPIO_MODE_INPUT_* for values.
 static inline void SetGpioMode(GPIO_t* gpio, int port, int mode) {
   __IO uint32_t* cr;
@@ -124,5 +128,9 @@ static inline void AdcDmaOn(void* dma_buffer, int dma_buffer_count) {
 static inline void AdcOn(void) { ADC1->CR2 |= ADC_CR2_ADON; }
 
 static inline void AdcOff(void) { ADC1->CR2 &= ~ADC_CR2_ADON; }
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif  // __cplusplus
 
 #endif  // INCLUDE_LED_H

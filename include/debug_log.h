@@ -21,6 +21,10 @@ limitations under the License.
 
 #include "strings.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif  // __cplusplus
+
 // Writes a string to the OpenOCD debug console. This can take hundreds of
 // milliseconds, so don't call this in performance-intensive code.
 static void DebugLog(char* s) {
@@ -75,5 +79,9 @@ static void DebugLogHex(uint32_t i) {
     StrCatStr(log, log_length, "\n");     \
     DebugLog(log);                        \
   } while (0)
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif  // __cplusplus
 
 #endif  // INCLUDE_DEBUG_LOG_H

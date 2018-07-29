@@ -16,6 +16,10 @@ limitations under the License.
 #ifndef INCLUDE_STM32_SPECIFICS_H
 #define INCLUDE_STM32_SPECIFICS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif  // __cplusplus
+
 // Now define some device-specific structures. For more information, see
 // http://www.st.com/content/ccc/resource/technical/document/reference_manual/59/b9/ba/7f/11/af/43/d5/CD00171190.pdf/files/CD00171190.pdf/jcr:content/translations/en.CD00171190.pdf
 
@@ -629,5 +633,9 @@ typedef struct {
 #define TIM_SR_CC2OF (1 << 9)
 #define TIM_SR_CC3OF (1 << 9)
 #define TIM_SR_CC4OF (1 << 9)
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif  // __cplusplus
 
 #endif  // INCLUDE_STM32_SPECIFICS_H
