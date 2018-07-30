@@ -33,18 +33,23 @@ static const int kFastToBufferSize = 48;
 // Populates the provided buffer with an ASCII representation of the number.
 char* FastInt32ToBufferLeft(int32_t i, char* buffer);
 
+// Populates the provided buffer with ASCII representation of the float number.
+// Avoids the use of any floating point instructions (since these aren't
+// supported on many microcontrollers) and as a consequence prints values with
+// power-of-two exponents.
+char* FastFloatToBufferLeft(float i, char* buffer);
+
 // Appends a string to a string, in-place. You need to pass in the maximum
-// string
-// length as the second argument.
+// string length as the second argument.
 char* StrCatStr(char* main, int main_max_length, char* to_append);
 
 // Converts a number to a string and appends it to another.
-void StrCatInt32(char* main, int main_max_length, int32_t number);
+char* StrCatInt32(char* main, int main_max_length, int32_t number);
 
 // Converts a number to a string and appends it to another.
-void StrCatUInt32(char* main, int main_max_length, uint32_t number, int base);
+char* StrCatUInt32(char* main, int main_max_length, uint32_t number, int base);
 
-void StrCpy(char* main, int main_max_length, const char* source);
+char* StrCpy(char* main, int main_max_length, const char* source);
 
 #ifdef __cplusplus
 }  // extern "C"

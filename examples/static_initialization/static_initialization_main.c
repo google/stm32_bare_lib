@@ -22,6 +22,7 @@ limitations under the License.
 // test static initialization
 static char foo_static[] = {'s', 't', 'a', 't', 'i', 'c', '\n'};
 static long uninitialized_values[4];
+static float float_static = -23.232323f;
 
 void main(void) {
   DebugLog("Starting static initialization test\n");
@@ -31,6 +32,8 @@ void main(void) {
       ;
     DebugLog(foo_static);
     DebugLogHex(uninitialized_values[0]);
+    DebugLog("\n");
+    DebugLogFloat(float_static);
     DebugLog("\n");
   }
 }

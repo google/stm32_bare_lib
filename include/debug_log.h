@@ -57,6 +57,13 @@ static void DebugLogHex(uint32_t i) {
   DebugLog(number_string);
 }
 
+// Writes out a signed 32-bit number to the debug console.
+static void DebugLogFloat(float i) {
+  char number_string[kFastToBufferSize];
+  FastFloatToBufferLeft(i, number_string);
+  DebugLog(number_string);
+}
+
 // An easy way of logging labeled numerical variables for debugging.
 #define LOG_INT32(x)                  \
   do {                                \

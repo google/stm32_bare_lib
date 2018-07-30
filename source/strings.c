@@ -55,9 +55,65 @@ char* FastInt32ToBufferLeft(int32_t i, char* buffer) {
   return FastUInt32ToBufferLeft(u, buffer, 10);
 }
 
+// Populates the provided buffer with ASCII representation of the float number.
+// Avoids the use of any floating point instructions (since these aren't
+// supported on many microcontrollers) and as a consequence prints values with
+// power-of-two exponents.
+char* FastFloatToBufferLeft(float i, char* buffer) {
+  char* current = buffer;
+  char* current_end = buffer + (kFastToBufferSize - 1);
+  // Access the bit fields of the floating point value to avoid requiring any
+  // float instructions. These constants are derived from IEEE 754.
+  const uint32_t sign_mask = 0x80000000;
+  const uint32_t exponent_mask = 0x7f800000;
+  const int32_t exponent_shift = 23;
+  const int32_t exponent_bias = 127;
+  const uint32_t fraction_mask = 0x007fffff;
+  const uint32_t u = *(uint32_t*)(&i);
+  const int32_t exponent =
+      ((u & exponent_mask) >> exponent_shift) - exponent_bias;
+  const uint32_t fraction = (u & fraction_mask);
+  // Expect ~0x2B1B9D3 for fraction.
+  if (u & sign_mask) {
+    *current = '-';
+    current += 1;
+  }
+  *current = 0;
+  // These are special cases for infinities and not-a-numbers.
+  if (exponent == 128) {
+    if (fraction == 0) {
+      current = StrCatStr(current, (current_end - current), "Inf");
+      return current;
+    } else {
+      current = StrCatStr(current, (current_end - current), "NaN");
+      return current;
+    }
+  }
+  // 0x007fffff represents 0.99... for the fraction, so to print the correct
+  // decimal digits we need to scale our value before passing it to the
+  // conversion function. This scale should be 10000000/8388608 = 1.1920928955.
+  // We can approximate this using multipy-adds and right-shifts using the
+  // values in this array.
+  const int32_t scale_shifts_size = 13;
+  const int8_t scale_shifts[13] = {3,  4,  8,  11, 13, 14, 17,
+                                   18, 19, 20, 21, 22, 23};
+  uint32_t scaled_fraction = fraction;
+  for (int i = 0; i < scale_shifts_size; ++i) {
+    scaled_fraction += (fraction >> scale_shifts[i]);
+  }
+  *current = '1';
+  current += 1;
+  *current = '.';
+  current += 1;
+  *current = 0;
+  current = StrCatUInt32(current, (current_end - current), scaled_fraction, 10);
+  current = StrCatStr(current, (current_end - current), "*2^");
+  current = StrCatInt32(current, (current_end - current), exponent);
+  return current;
+}
+
 // Appends a string to a string, in-place. You need to pass in the maximum
-// string
-// length as the second argument.
+// string length as the second argument.
 char* StrCatStr(char* main, int main_max_length, char* to_append) {
   char* current = main;
   while (*current != 0) {
@@ -70,23 +126,24 @@ char* StrCatStr(char* main, int main_max_length, char* to_append) {
     ++to_append;
   }
   *current = 0;
+  return current;
 }
 
 // Converts a number to a string and appends it to another.
-void StrCatInt32(char* main, int main_max_length, int32_t number) {
+char* StrCatInt32(char* main, int main_max_length, int32_t number) {
   char number_string[kFastToBufferSize];
   FastInt32ToBufferLeft(number, number_string);
-  StrCatStr(main, main_max_length, number_string);
+  return StrCatStr(main, main_max_length, number_string);
 }
 
 // Converts a number to a string and appends it to another.
-void StrCatUInt32(char* main, int main_max_length, uint32_t number, int base) {
+char* StrCatUInt32(char* main, int main_max_length, uint32_t number, int base) {
   char number_string[kFastToBufferSize];
   FastUInt32ToBufferLeft(number, number_string, base);
-  StrCatStr(main, main_max_length, number_string);
+  return StrCatStr(main, main_max_length, number_string);
 }
 
-void StrCpy(char* main, int main_max_length, const char* source) {
+char* StrCpy(char* main, int main_max_length, const char* source) {
   char* current = main;
   char* current_end = main + (main_max_length - 1);
   while ((*source != 0) && (current < current_end)) {
@@ -95,4 +152,5 @@ void StrCpy(char* main, int main_max_length, const char* source) {
     ++source;
   }
   *current = 0;
+  return current;
 }
