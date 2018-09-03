@@ -1,0 +1,16 @@
+using sysbus
+
+mach create
+machine LoadPlatformDescription @platforms/cpus/stm32f103.repl
+
+$bin?=@/stm32_bare_lib/gen/elf/examples/blink.elf
+
+showAnalyzer uart2 Antmicro.Renode.Analyzers.LoggingUartAnalyzer
+sysbus LogPeripheralAccess sysbus.gpioPortC
+
+macro reset
+"""
+    sysbus LoadELF $bin
+"""
+
+runMacro $reset
