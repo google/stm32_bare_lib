@@ -5,8 +5,8 @@ machine LoadPlatformDescription @platforms/cpus/stm32f103.repl
 
 $bin?=@/stm32_bare_lib/gen/elf/examples/blink.elf
 
-showAnalyzer uart2 Antmicro.Renode.Analyzers.LoggingUartAnalyzer
 sysbus LogPeripheralAccess sysbus.gpioPortC
+logFile @/tmp/renode_bluepill_log.txt
 
 macro reset
 """
@@ -14,3 +14,7 @@ macro reset
 """
 
 runMacro $reset
+
+emulation RunFor @1
+
+quit
