@@ -4,18 +4,18 @@ System functions and example code for programming the "Blue Pill"
 STM32-compatible micro-controller boards. This is not an officially supported
 Google product.
 
-    * [Introduction](#introduction)
-    * [What You Need](#what-you-need)
-    * [Install OpenOCD on your Pi](#install-openocd-on-your-pi)
-    * [Wiring up your Blue Pill](#wiring-up-your-blue-pill)
-    * [Building the Examples](#building-the-examples)
-    * [Testing OpenOCD](#testing-openocd)
-    * [Running Examples](#running-examples)
-    * [Debug Output](#debug-output)
-    * [Debugging with GDB](#debugging-with-gdb)
-    * [Using the Library](#using-the-library)
-    * [Testing and Debugging using Emulation](#testing-and-debugging-using-emulation)
-    * [Further Reading](#further-reading)
+ * [Introduction](#introduction)
+ * [What You Need](#what-you-need)
+ * [Install OpenOCD on your Pi](#install-openocd-on-your-pi)
+ * [Wiring up your Blue Pill](#wiring-up-your-blue-pill)
+ * [Building the Examples](#building-the-examples)
+ * [Testing OpenOCD](#testing-openocd)
+ * [Running Examples](#running-examples)
+ * [Debug Output](#debug-output)
+ * [Debugging with GDB](#debugging-with-gdb)
+ * [Using the Library](#using-the-library)
+ * [Testing and Debugging using Emulation](#testing-and-debugging-using-emulation)
+ * [Further Reading](#further-reading)
 
 ## Introduction
 
