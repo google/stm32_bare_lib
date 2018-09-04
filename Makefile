@@ -20,7 +20,7 @@ OBJCOPY := $(CROSS_PREFIX)-objcopy
 OPTFLAGS := -O3
 # Debug symbols are enabled with -g, but since we compile ELFs down to bin files, these don't
 # affect the code size on-device.
-BASE_COMPILER_FLAGS := -mcpu=cortex-m3 -mthumb -g -gdwarf-2 $(OPTFLAGS)
+BASE_COMPILER_FLAGS := -mcpu=cortex-m3 -mthumb -std=gnu99 -g -gdwarf-2 $(OPTFLAGS)
 CCFLAGS:= $(BASE_COMPILER_FLAGS)
 CPPFLAGS:= $(BASE_COMPILER_FLAGS)
 

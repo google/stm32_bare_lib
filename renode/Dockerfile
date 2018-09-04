@@ -16,3 +16,9 @@ RUN apt update
 RUN apt install -y curl telnet
 RUN curl -L https://github.com/renode/renode/releases/download/v1.4.2/renode_1.4.2_amd64.deb -o /tmp/renode_1.4.2_amd64.deb
 RUN apt install -y /tmp/renode_1.4.2_amd64.deb
+
+# Install building tools
+RUN apt install -y gcc-arm-none-eabi unzip
+RUN curl -L https://github.com/ARM-software/CMSIS_5/archive/5.4.0.zip -o /CMSIS_5.zip
+RUN unzip /CMSIS_5.zip
+RUN ln -s /CMSIS_5-5.4.0 /CMSIS_5
