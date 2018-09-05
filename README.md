@@ -424,15 +424,14 @@ code's running correctly without needing a physical board connected to your
 testing machine.
 
 To show how this works, you can try running the
-[`renode/test_blink.sh`](https://github.com/google/stm32_bare_lib/blob/master/renode/test_blink.sh)
+[`renode/test_hello_world.sh`](https://github.com/google/stm32_bare_lib/blob/master/renode/test_hello_world.sh)
 script on any machine with Docker and Bash installed. This calls a
 [Dockerfile](https://github.com/google/stm32_bare_lib/blob/master/renode/Dockerfile)
 that installs Renode and its dependencies into an Ubuntu 16.04 virtual machine,
 and then builds and runs
-[the blink example](https://github.com/google/stm32_bare_lib/blob/master/examples/blink/)
+[the hello world example](https://github.com/google/stm32_bare_lib/blob/master/examples/hello_world/)
 in that environment. It then examines the log output, and checks that the
-expected LED device registers have been set and cleared, returning success if
-they have.
+expected debug log message has been output, returning success if it has.
 
 This bundling of building, running, and testing the code into a self-contained
 script means that it's possible to integrate with standard continuous testing
