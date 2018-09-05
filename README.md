@@ -460,7 +460,7 @@ hello world test manually with this command:
 renode -P 5000 --disable-xwt -e 's @/stm32_bare_lib/renode/test_hello_world.resc'
 ```
 
-What this does is build the [hello world example](https://github.com/google/stm32_bare_lib/blob/master/renode/Dockerfile),
+What this does is build the [hello world example](https://github.com/google/stm32_bare_lib/blob/master/examples/hello_world/hello_world_main.c),
 runs it in the emulator, and then checks the logs to ensure that the expected
 "Hello World!" string was output. Accessing the logs like this makes it
 possible to create complex tests that output their results to the host through
