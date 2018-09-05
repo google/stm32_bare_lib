@@ -450,26 +450,35 @@ can then open up a shell in the virtual machine with Renode installed by
 running:
 
 ```bash
-docker run -v `pwd`:/stm32_bare_lib -it renode_bluepill /stm32_bare_lib/renode/test_blink_internal.sh
+docker run -v `pwd`:/stm32_bare_lib -it renode_bluepill /stm32_bare_lib/renode/test_hello_world_internal.sh
 ```
 
 You should now find yourself at a root prompt inside the VM. You can run the
-blink test manually with this command:
+hello world test manually with this command:
 
 ```bash
-renode -P 5000 --disable-xwt -e 's @/stm32_bare_lib/renode/test_blink.resc'
+renode -P 5000 --disable-xwt -e 's @/stm32_bare_lib/renode/test_hello_world.resc'
 ```
 
+What this does is build the [hello world example](https://github.com/google/stm32_bare_lib/blob/master/renode/Dockerfile),
+runs it in the emulator, and then checks the logs to ensure that the expected
+"Hello World!" string was output. Accessing the logs like this makes it
+possible to create complex tests that output their results to the host through
+`DebugLog()` calls.
+
 If you want to use Renode's monitor interactively, you'll need to open up two
-terminal windows. In the first one, start the renode process by running:
+terminal windows. In the first one, run docker with the `docker run -v` command
+above and then start the renode process by running:
 
 ```bash
 renode -P 5000 --disable-xwt
 ```
 
-In the second window, connect to the monitor using the telnet command:
+In the second window, connect to the running docker instance, and then telnet to
+the monitor using these commands:
 
 ```bash
+docker exec -ti $(docker ps -q |head -n1) bash
 telnet localhost 5000
 ```
 

@@ -7,9 +7,8 @@ machine LoadPlatformDescription @platforms/cpus/stm32f103.repl
 machine LoadPlatformDescriptionFromString "uartSemihosting: UART.SemihostingUart @ cpu"
 showAnalyzer cpu.uartSemihosting Antmicro.Renode.Analyzers.LoggingUartAnalyzer
 
-$bin?=@/stm32_bare_lib/gen/elf/examples/blink.elf
+$bin?=@/stm32_bare_lib/gen/elf/examples/hello_world.elf
 
-sysbus LogPeripheralAccess sysbus.gpioPortC
 logFile @/tmp/renode_bluepill_log.txt
 
 macro reset
