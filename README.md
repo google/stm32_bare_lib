@@ -442,29 +442,33 @@ image yourself by running:
 ```bash
 docker build -t renode_bluepill -f renode/Dockerfile .
 ```
-
 This will take a few minutes the first time, since the Renode dependencies are
-quite large, but subsequent runs should be much faster thanks to the cache. You
-can then open up a shell in the virtual machine with Renode installed by
-running:
+quite large, but subsequent runs should be much faster thanks to the cache. Then, use:
 
 ```bash
 docker run -v `pwd`:/stm32_bare_lib -it renode_bluepill /stm32_bare_lib/renode/test_hello_world_internal.sh
 ```
 
+to execute the test (this is the same command that is used by `test_hello_world.sh`).
+
+What this does is build the [hello world example](https://github.com/google/stm32_bare_lib/blob/master/examples/hello_world/hello_world_main.c),
+run it in the emulator, and then check the logs to ensure that the expected
+"Hello World!" string was output. Accessing the logs like this makes it
+possible to create complex tests that output their results to the host through
+`DebugLog()` calls.
+
+You can also open up a shell in the virtual machine with Renode installed by
+running:
+
+```bash
+docker run -v `pwd`:/stm32_bare_lib -it renode_bluepill
+```
 You should now find yourself at a root prompt inside the VM. You can run the
 hello world test manually with this command:
 
 ```bash
 renode -P 5000 --disable-xwt -e 's @/stm32_bare_lib/renode/test_hello_world.resc'
 ```
-
-What this does is build the [hello world example](https://github.com/google/stm32_bare_lib/blob/master/examples/hello_world/hello_world_main.c),
-runs it in the emulator, and then checks the logs to ensure that the expected
-"Hello World!" string was output. Accessing the logs like this makes it
-possible to create complex tests that output their results to the host through
-`DebugLog()` calls.
-
 If you want to use Renode's monitor interactively, you'll need to open up two
 terminal windows. In the first one, run docker with the `docker run -v` command
 above and then start the renode process by running:
