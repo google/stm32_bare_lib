@@ -4,6 +4,7 @@
 FROM antmicro/renode:latest
 
 LABEL maintainer="Pete Warden <petewarden@google.com>"
+WORKDIR /
 
 # Install building tools
 RUN apt install -y gcc-arm-none-eabi unzip
