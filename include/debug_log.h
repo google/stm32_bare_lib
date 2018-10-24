@@ -27,42 +27,19 @@ extern "C" {
 
 // Writes a string to the OpenOCD debug console. This can take hundreds of
 // milliseconds, so don't call this in performance-intensive code.
-static void DebugLog(char* s) {
-  asm("mov r0, #0x04\n"  // SYS_WRITE0
-      "mov r1, %[str]\n"
-      "bkpt #0xAB\n"
-      :
-      : [str] "r"(s)
-      : "r0", "r1");
-}
+void DebugLog(char* s);
 
 // Writes out a signed 32-bit number to the debug console.
-static void DebugLogInt32(int32_t i) {
-  char number_string[kFastToBufferSize];
-  FastInt32ToBufferLeft(i, number_string);
-  DebugLog(number_string);
-}
+void DebugLogInt32(int32_t i);
 
 // Writes out an unsigned 32-bit number to the debug console.
-static inline void DebugLogUInt32(uint32_t i) {
-  char number_string[kFastToBufferSize];
-  FastUInt32ToBufferLeft(i, number_string, 10);
-  DebugLog(number_string);
-}
+void DebugLogUInt32(uint32_t i);
 
 // Writes out an unsigned 32-bit number to the debug console as hex.
-static void DebugLogHex(uint32_t i) {
-  char number_string[kFastToBufferSize];
-  FastUInt32ToBufferLeft(i, number_string, 16);
-  DebugLog(number_string);
-}
+void DebugLogHex(uint32_t i);
 
 // Writes out a signed 32-bit number to the debug console.
-static void DebugLogFloat(float i) {
-  char number_string[kFastToBufferSize];
-  FastFloatToBufferLeft(i, number_string);
-  DebugLog(number_string);
-}
+void DebugLogFloat(float i);
 
 // An easy way of logging labeled numerical variables for debugging.
 #define LOG_INT32(x)                  \
