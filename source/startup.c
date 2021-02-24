@@ -111,12 +111,12 @@ void _load_data_from_flash() {
     *dest++ = *src++;
 }
 
-// "Zero" uninitialized data with DEADBEEF.
+// Zero uninitialized data.
 void _zero_initialize_bss_data() {
   // Volatile is important here to make sure the loop isn't optimized away.
   for (volatile uint32* dest = &_ld_bss_data_start; dest != &_ld_bss_data_stop;
        dest++)
-    *dest = 0xDEADBEEF;
+    *dest = 0x00000000;
 }
 // Put this in the .text.reset segment so the linker script can
 // make sure this is not pruned.
